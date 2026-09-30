@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freedom with Arman — EMA 9/33 Spot Scanner</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#f5f7ff}
+.wrap{max-width:1200px;margin:auto;padding:22px}
+header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+h1{margin:0;font-size:25px}.sub{color:#9aa7c7;margin-top:6px}
+.controls{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+input,select,button{background:#151d34;color:white;border:1px solid #2b385b;border-radius:10px;padding:11px 13px}
+button{cursor:pointer;font-weight:bold}button:hover{background:#202b49}
+.status{margin-top:16px;padding:12px 14px;border-radius:10px;background:#111a30;color:#b9c5df}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.card{background:#111a30;border:1px solid #202c4b;border-radius:14px;padding:16px}.num{font-size:24px;font-weight:bold;margin-top:6px}
+table{width:100%;border-collapse:collapse;background:#111a30;border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #202c4b}th{color:#9fb0d5;font-size:13px}
+.up{color:#39e58c;font-weight:bold}.down{color:#ff6878;font-weight:bold}.wait{color:#9fb0d5}
+.scanner-section{margin-top:24px}
+.scanner-section h2{margin:0 0 5px;font-size:20px}
+.scanner-section .sub{margin-bottom:12px}
+.small{font-size:12px;color:#8492b2}
+@media(max-width:700px){.cards{grid-template-columns:1fr}th:nth-child(4),td:nth-child(4){display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Freedom with Arman</h1>
+    <div class="sub">Binance Spot USDT • All Current Spot Pairs • EMA 9 / EMA 33 Scanner</div>
+  </div>
+  <button id="scanBtn">Scan Now</button>
+</header>
+
+<div class="controls">
+  <input id="search" placeholder="Search coin, e.g. BTC">
+  <select id="filter">
+    <option value="all">All Pairs</option>
+    <option value="cross">Fresh EMA Cross Only</option>
+  </select>
+</div>
+
+<div id="status" class="status">Loading ALL Binance Spot USDT pairs...</div><div class="small" style="margin-top:8px">The Scan button checks every currently available Binance Spot USDT pair.</div>
+
+<div class="cards">
+  <div class="card">Spot Pairs<div class="num" id="total">—</div></div></div>
+</div>
+
+<section class="scanner-section">
+<h2>📈 EMA Scanner</h2>
+<div class="sub">EMA 9 → EMA 33 fresh Cross Up</div>
+<table>
+<thead><tr><th>Coin</th><th>Price</th><th>Signal</th><th>EMA 9 / EMA 33</th><th>Time</th></tr></thead>
+<tbody id="emaRows"><tr><td colspan="5" class="wait">Waiting for scan...</td></tr></tbody>
+</table>
+</section>
+<section class="scanner-section">
+<h2>📈 Up Trend Scanner</h2>
+<div class="sub">Sirf woh coins jahan 1 Hour aur 1 Day dono UP trend mein hain.</div>
+<table>
+<thead><tr><th>Coin</th><th>Price</th><th>1 Hour Trend</th><th>1 Day Trend</th></tr></thead>
+<tbody id="upRows"><tr><td colspan="4" class="wait">Waiting for scan...</td></tr></tbody>
+</table>
+</section>
+
+<section class="scanner-section">
+<h2>📉 Down Trend Scanner</h2>
+<div class="sub">Sirf woh coins jahan 1 Hour aur 1 Day dono DOWN trend mein hain.</div>
+<table>
+<thead><tr><th>Coin</th><th>Price</th><th>1 Hour Trend</th><th>1 Day Trend</th></tr></thead>
+<tbody id="downRows"><tr><td colspan="4" class="wait">Waiting for scan...</td></tr></tbody>
+</table>
+</section>
+
+<section class="scanner-section">
+<h2>↔️ Ranging Market Scanner</h2>
+<div class="sub">Ranging market — koi timeframe display nahi kiya jayega.</div>
+<table>
+<thead><tr><th>Coin</th><th>Price</th><th>Market</th></tr></thead>
+<tbody id="rangeRows"><tr><td colspan="3" class="wait">Waiting for scan...</td></tr></tbody>
+</table>
+</section>
+
+<p class="small">Signal is based on the latest completed candle. Data comes from Binance public market-data endpoints.</p>
+</div>
+
+<script>
+const API="https://api.binance.com";
+let pairs=[], results=[];
+const $=id=>document.getElementById(id);
+
+function ema(values, period){
+  if(values.length<period) return null;
+  let e=values.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  const k=2/(period+1);
+  for(let i=period;i<values.length;i++) e=values[i]*k+e*(1-k);
+  return e;
+}
+async function getPairs(){
+  const r=await fetch(API+"/api/v3/exchangeInfo");
+  if(!r.ok) throw new Error("Binance exchangeInfo request failed");
+  const d=await r.json();
+  // Dynamically use every currently TRADING Binance Spot USDT pair.
+  pairs=d.symbols.filter(x=>
+    x.status==="TRADING" &&
+    x.isSpotTradingAllowed===true &&
+    x.quoteAsset==="USDT"
+  );
+  $("total").textContent=pairs.length;
+}
+async function scanSymbol(s){
+  try{
+    const [k1h,k1d]=await Promise.all([
+      fetch(`${API}/api/v3/klines?symbol=${s.symbol}&interval=1h&limit=80`).then(r=>r.json()),
+      fetch(`${API}/api/v3/klines?symbol=${s.symbol}&interval=1d&limit=80`).then(r=>r.json())
+    ]);
+    if(!Array.isArray(k1h)||!Array.isArray(k1d)||k1h.length<40||k1d.length<40)return null;
+
+    // Use only completed candles for trend/cross decisions.
+    const h=k1h.slice(0,-1), d=k1d.slice(0,-1);
+    const hc=h.map(x=>Number(x[4])), dc=d.map(x=>Number(x[4]));
+    const prevH=hc.slice(0,-1);
+
+    const e9=ema(hc,9), e33=ema(hc,33);
+    const p9=ema(prevH,9), p33=ema(prevH,33);
+
+    // Fresh EMA 9/33 upward cross on the latest completed 1H candle only.
+    const emaCrossUp = p9 <= p33 && e9 > e33;
+
+    const e9d=ema(dc,9), e33d=ema(dc,33);
+    if([e9,e33,p9,p33,e9d,e33d].some(v=>v==null))return null;
+
+    const up1h=e9>e33, up1d=e9d>e33d;
+    const down1h=e9<e33, down1d=e9d<e33d;
+
+    // Ranging = neither timeframe has a clear EMA 9/33 trend.
+    const ranging = !(up1h && up1d) && !(down1h && down1d);
+
+    return {
+      symbol:s.symbol,
+      price:Number(k1h.at(-1)[4]),
+      e9,e33,e9d,e33d,
+      signal:emaCrossUp?"EMA_SIGNAL":"WAIT",
+      upTrend:up1h&&up1d,
+      downTrend:down1h&&down1d,
+      ranging,
+      time:new Date(h.at(-1)[6]).toLocaleString()
+    };
+  }catch(e){return null}
+}
+async function scan(){
+  $("scanBtn").disabled=true;$("status").textContent="Scanning Spot pairs...";
+  results=[];
+  // Scan every available Spot USDT pair directly — no 30-pair batch limit.
+  $("status").textContent=`Scanning ALL ${pairs.length} Spot pairs...`;
+  const got=await Promise.all(pairs.map(scanSymbol));
+  results=got.filter(Boolean);
+  render();
+  $("scanBtn").disabled=false;
+  $("status").textContent=`Scan complete • ALL ${pairs.length} Spot USDT pairs checked • ${new Date().toLocaleTimeString()}`;
+}
+function render(){
+  const q=$("search").value.trim().toUpperCase();
+
+  const emaData=results.filter(x=>x.signal==="EMA_SIGNAL" && (!q||x.symbol.includes(q)));
+  const upData=results.filter(x=>x.upTrend && (!q||x.symbol.includes(q)));
+  const downData=results.filter(x=>x.downTrend && (!q||x.symbol.includes(q)));
+  const rangeData=results.filter(x=>x.ranging && (!q||x.symbol.includes(q)));
+
+  $("emaRows").innerHTML=emaData.length?emaData.map(x=>`
+    <tr onclick="openTv('${x.symbol}')" style="cursor:pointer">
+      <td><b>${x.symbol}</b></td><td>${fmt(x.price)}</td>
+      <td class="up">🟢 EMA 9 ↑ EMA 33</td>
+      <td>${fmt(x.e9)} / ${fmt(x.e33)}</td><td class="small">Fresh 1H cross</td>
+    </tr>
+  `).join(""):`<tr><td colspan="5" class="wait">No fresh EMA 9/33 crossover signals.</td></tr>`;
+
+  $("upRows").innerHTML=upData.length?upData.map(x=>`
+    <tr onclick="openTv('${x.symbol}')" style="cursor:pointer">
+      <td><b>${x.symbol}</b></td><td>${fmt(x.price)}</td>
+      <td class="up">🟢 UP</td><td class="up">🟢 UP</td>
+    </tr>
+  `).join(""):`<tr><td colspan="4" class="wait">No up-trend coins found.</td></tr>`;
+
+  $("downRows").innerHTML=downData.length?downData.map(x=>`
+    <tr onclick="openTv('${x.symbol}')" style="cursor:pointer">
+      <td><b>${x.symbol}</b></td><td>${fmt(x.price)}</td>
+      <td class="down">🔴 DOWN</td><td class="down">🔴 DOWN</td>
+    </tr>
+  `).join(""):`<tr><td colspan="4" class="wait">No down-trend coins found.</td></tr>`;
+
+  $("rangeRows").innerHTML=rangeData.length?rangeData.map(x=>`
+    <tr onclick="openTv('${x.symbol}')" style="cursor:pointer">
+      <td><b>${x.symbol}</b></td><td>${fmt(x.price)}</td>
+      <td class="wait">↔️ RANGING MARKET</td>
+    </tr>
+  `).join(""):`<tr><td colspan="3" class="wait">No ranging coins found.</td></tr>`;
+}
+function openTv(symbol){window.open('https://www.tradingview.com/symbols/'+symbol+'/','_blank','noopener');}
+
+function fmt(n){return Number(n).toLocaleString(undefined,{maximumSignificantDigits:10})}
+$("scanBtn").onclick=scan;$("search").oninput=render;$("filter").onchange=render;
+(async()=>{try{await getPairs();$("status").textContent="Ready — Scan Now button dabao."; }catch(e){$("status").textContent="Could not load Binance Spot pairs. Check internet access or Binance API availability.";}})();
+</script>
+</body>
+</html>
