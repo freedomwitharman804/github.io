@@ -1,39 +1,447 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Freedom with Arman — Spot Market Scanner</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Freedom with Arman — Market Scanner</title>
 <style>
-:root{color-scheme:light dark;--bg:light-dark(#f5f7fb,#0a1020);--panel:light-dark(#fff,#111a2d);--panel2:light-dark(#f0f4fa,#172239);--text:light-dark(#15213b,#eef3ff);--muted:light-dark(#66748c,#9cabc6);--border:light-dark(#e0e7f1,#283650);--accent:#6c7cff;--green:#13a878;--red:#e45c69;--yellow:#c58b18}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}#app{min-height:100vh;background:var(--bg)}header{padding:24px max(18px,calc((100vw - 1180px)/2));background:linear-gradient(120deg,#101a36,#1e2c55 65%,#343b79);color:#fff} .brand{display:flex;align-items:center;gap:12px}.logo{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#7e8cff;font-weight:900;font-size:20px;box-shadow:0 8px 24px #0003}.brand h1{margin:0;font-size:clamp(22px,4vw,31px);letter-spacing:-.6px}.brand p{margin:2px 0 0;color:#c8d1f3;font-size:13px}.headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.status{font-size:12px;border:1px solid #ffffff45;border-radius:999px;padding:7px 11px;color:#dfe5ff}.wrap{max-width:1180px;margin:auto;padding:22px 18px 42px}.intro{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:18px}.intro h2{font-size:22px;margin:0 0 4px}.intro p{margin:0;color:var(--muted)}button,select,input{font:inherit}button{border:0;cursor:pointer}.refresh{background:var(--accent);color:white;padding:11px 16px;border-radius:11px;font-weight:700}.refresh:disabled{opacity:.55;cursor:wait}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.stat,.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px}.stat{padding:16px}.stat .label{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:26px;letter-spacing:-.5px;margin-top:5px}.stat small{color:var(--muted)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 14px}.tab{padding:10px 14px;border-radius:11px;background:var(--panel2);color:var(--muted);border:1px solid var(--border);font-weight:700}.tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}.tab .count{margin-left:7px;opacity:.75}.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px;border-bottom:1px solid var(--border)}.filters input,.filters select{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-height:42px}.filters input{flex:1;min-width:170px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:720px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--border);white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;background:var(--panel)}td{font-size:14px}tbody tr:hover{background:var(--panel2)}.coin{font-weight:800}.pair{display:block;font-size:11px;color:var(--muted);font-weight:500}.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.up{color:var(--green);background:color-mix(in srgb,var(--green) 13%,transparent)}.down{color:var(--red);background:color-mix(in srgb,var(--red) 13%,transparent)}.range{color:var(--yellow);background:color-mix(in srgb,var(--yellow) 14%,transparent)}.muted{color:var(--muted)}.empty{text-align:center;padding:42px 16px;color:var(--muted)}.notice{padding:14px 16px;background:var(--panel2);border:1px solid var(--border);border-radius:13px;color:var(--muted);font-size:13px;margin-top:16px}.notice strong{color:var(--text)}.error{color:var(--red);font-size:13px;margin:12px 0}.foot{color:var(--muted);font-size:12px;margin-top:22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.loading{display:inline-block;width:13px;height:13px;border:2px solid #ffffff75;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:650px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat strong{font-size:23px}.wrap{padding:17px 12px 30px}header{padding:20px 14px}.intro h2{font-size:20px}}
-</style></head>
-<body><div id="app"><header><div class="headrow"><div class="brand"><div class="logo">FA</div><div><h1>Freedom with Arman</h1><p>Binance Spot Market Scanner · Simple market view</p></div></div><div class="status" id="liveStatus">● Ready to scan</div></div></header>
-<main class="wrap"><div class="intro"><div><h2>Spot Trend Dashboard</h2><p>All active Binance Spot USDT pairs · Futures excluded</p></div><button class="refresh" id="scanBtn" onclick="scanMarket()">↻ Scan market</button></div>
-<div class="notice"><strong>Signal rule:</strong><br>✅ Signal tab aaye jab coin ka trend naya-naya Uptrend mein aaye aur 1D aur 1H dono Uptrend hon. RSI 55 cross ki condition nahi hai.</div>
-<div class="stats"><div class="stat"><span class="label">Spot pairs checked</span><strong id="total">—</strong><small>Active USDT markets</small></div><div class="stat"><span class="label">Uptrend · 1D + 1H</span><strong id="upTotal">—</strong><small>Both timeframes bullish</small></div><div class="stat"><span class="label">Ranging · no timeframe filter</span><strong id="rangeTotal">—</strong><small>No timeframe filter</small></div><div class="stat"><span class="label">Downtrend · 1D + 1H</span><strong id="downTotal">—</strong><small>Both timeframes bearish</small></div></div>
-<div class="tabs"><button class="tab active" data-page="up" onclick="setPage('up')">↗ Uptrend <span class="count" id="upCount">0</span></button><button class="tab" data-page="range" onclick="setPage('range')">↔ Ranging <span class="count" id="rangeCount">0</span></button><button class="tab" data-page="down" onclick="setPage('down')">↘ Downtrend <span class="count" id="downCount">0</span></button></div>
-<section class="panel"><div class="filters"><input id="search" placeholder="Search coin, e.g. BTC, ETH…" oninput="renderTable()"><select id="sort" onchange="renderTable()"><option value="symbol">Sort: Coin name</option><option value="changeDesc">24h change: highest</option><option value="changeAsc">24h change: lowest</option><option value="volume">24h volume: highest</option></select><select id="limit" onchange="renderTable()"><option value="50">Show 50</option><option value="100">Show 100</option><option value="all">Show all</option></select></div><div id="message" class="error" style="display:none;padding:0 16px"></div><div class="tablewrap"><table><thead><tr><th>Coin / Pair</th><th>Last price (USDT)</th><th>24h change</th><th class="trendHead">1D trend</th><th class="trendHead">1H trend</th><th id="rsiHead">Uptrend Signal</th><th>24h quote volume</th></tr></thead><tbody id="rows"><tr><td colspan="7" class="empty">Press “Scan market” to load current Binance Spot data.</td></tr></tbody></table></div></section>
-<div class="notice"><strong>How classification works:</strong> 1D and 1H are checked separately using 20/50-period moving averages and recent price range. Uptrend and downtrend require both 1D and 1H to match. A signal appears when a coin newly enters Uptrend and BOTH 1D and 1H are classified as uptrend. RSI 55 crossing is not required. Ranging does not require a specific timeframe: a coin is listed if the scanner identifies ranging conditions in either checked interval. The ranging page hides the timeframe columns. This is a technical filter, not a guarantee or a buy/sell recommendation.</div>
-<div class="notice"><strong>Data note:</strong> This standalone page requests public market data from Binance's public data endpoint when opened with an internet connection. It scans every active Spot USDT pair returned by Binance; scanning all pairs may take longer and can be affected by network/API rate limits. Only active <code>TRADING</code> Spot pairs quoted in USDT are eligible; leveraged tokens may be present if Binance lists them as Spot symbols.</div>
-<div class="foot"><span>Freedom with Arman · Informational tool only</span><span id="updated">Last scan: not yet run</span></div></main></div>
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#f5f7fb, #0a1020);
+  --panel: light-dark(#ffffff, #111a2d);
+  --panel2: light-dark(#f0f4fa, #172239);
+  --text: light-dark(#15213b, #eef3ff);
+  --muted: light-dark(#66748c, #9cabc6);
+  --border: light-dark(#e0e7f1, #283650);
+  --accent: #6c7cff;
+  --green: #13a878;
+  --red: #e45c69;
+  --yellow: #c58b18;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+#app { min-height: 100vh; }
+header {
+  padding: 24px max(18px, calc((100vw - 1180px)/2));
+  background: linear-gradient(120deg, #101a36, #1e2c55 65%, #343b79);
+  color: #fff;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  display: grid; place-items: center;
+  width: 44px; height: 44px;
+  border-radius: 14px; background: #7e8cff;
+  font-weight: 900; font-size: 20px;
+  box-shadow: 0 8px 24px #0003;
+}
+.brand h1 { margin: 0; font-size: clamp(22px, 4vw, 31px); letter-spacing: -.6px; }
+.brand p { margin: 2px 0 0; color: #c8d1f3; font-size: 13px; }
+.headrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.status { font-size: 12px; border: 1px solid #ffffff45; border-radius: 999px; padding: 7px 11px; color: #dfe5ff; }
+.wrap { max-width: 1180px; margin: auto; padding: 22px 18px 42px; }
+.intro { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.intro h2 { font-size: 22px; margin: 0 0 4px; }
+.intro p { margin: 0; color: var(--muted); }
+button, select, input { font: inherit; }
+button { border: 0; cursor: pointer; }
+.refresh { background: var(--accent); color: white; padding: 11px 16px; border-radius: 11px; font-weight: 700; }
+.refresh:disabled { opacity: .55; cursor: wait; }
+.scan-config { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; background: var(--panel); padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+.scan-config label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.scan-config select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.stat, .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+.stat { padding: 16px; }
+.stat .label { font-size: 12px; color: var(--muted); }
+.stat strong { display: block; font-size: 26px; letter-spacing: -.5px; margin-top: 5px; }
+.stat small { color: var(--muted); }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 14px; }
+.tab { padding: 10px 16px; border-radius: 11px; background: var(--panel2); color: var(--muted); border: 1px solid var(--border); font-weight: 700; }
+.tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.tab .count { margin-left: 7px; opacity: .8; font-size: 13px; }
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding: 14px; border-bottom: 1px solid var(--border); }
+.filters input, .filters select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; min-height: 42px; }
+.filters input { flex: 1; min-width: 170px; }
+.tablewrap { overflow: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 720px; }
+th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); font-weight: 700; background: var(--panel); }
+td { font-size: 14px; }
+tbody tr:hover { background: var(--panel2); }
+.coin { font-weight: 800; }
+.pair { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.up { color: var(--green); background: color-mix(in srgb, var(--green) 13%, transparent); }
+.down { color: var(--red); background: color-mix(in srgb, var(--red) 13%, transparent); }
+.range { color: var(--yellow); background: color-mix(in srgb, var(--yellow) 14%, transparent); }
+.muted { color: var(--muted); }
+.empty { text-align: center; padding: 42px 16px; color: var(--muted); }
+.error { color: var(--red); font-size: 13px; margin: 12px 0; }
+.foot { color: var(--muted); font-size: 12px; margin-top: 22px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.loading { display: inline-block; width: 13px; height: 13px; border: 2px solid #ffffff75; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 7px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media(max-width: 650px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat strong { font-size: 23px; }
+  .wrap { padding: 17px 12px 30px; }
+  header { padding: 20px 14px; }
+  .intro h2 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="headrow">
+      <div class="brand">
+        <div class="logo">FA</div>
+        <div>
+          <h1>Freedom with Arman</h1>
+          <p>Binance Market Scanner · Spot Trend Dashboard</p>
+        </div>
+      </div>
+      <div class="status" id="liveStatus">● Ready to scan</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <div>
+        <h2>Spot Trend Dashboard</h2>
+        <p>Multi-timeframe trend filter (1D + 1H)</p>
+      </div>
+      <button class="refresh" id="scanBtn" onclick="scanMarket()">↻ Scan market</button>
+    </div>
+
+    <!-- Scanner Market Type Selector Option -->
+    <div class="scan-config">
+      <label for="marketType">Market Mode:</label>
+      <select id="marketType">
+        <option value="spot" selected>🟢 Only Spot Market (No Futures)</option>
+        <option value="futures">🔴 Futures Market (Perpetual)</option>
+      </select>
+      <span style="font-size:12px; color:var(--muted); margin-left:auto;">(Spot mode excludes futures & leveraged tokens automatically)</span>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats">
+      <div class="stat"><span class="label">Pairs Checked</span><strong id="total">—</strong><small>Active Markets</small></div>
+      <div class="stat"><span class="label">Uptrend (1D + 1H)</span><strong id="upTotal">—</strong><small>Both timeframes bullish</small></div>
+      <div class="stat"><span class="label">Ranging Market</span><strong id="rangeTotal">—</strong><small>Consolidation state</small></div>
+      <div class="stat"><span class="label">Downtrend (1D + 1H)</span><strong id="downTotal">—</strong><small>Both timeframes bearish</small></div>
+    </div>
+
+    <!-- Category Page Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-page="up" onclick="setPage('up')">↗ Uptrend Page <span class="count" id="upCount">0</span></button>
+      <button class="tab" data-page="range" onclick="setPage('range')">↔ Ranging Page <span class="count" id="rangeCount">0</span></button>
+      <button class="tab" data-page="down" onclick="setPage('down')">↘ Downtrend Page <span class="count" id="downCount">0</span></button>
+    </div>
+
+    <!-- Table & Filters Panel -->
+    <section class="panel">
+      <div class="filters">
+        <input id="search" placeholder="Search coin (e.g. BTC, ETH, SOL)…" oninput="renderTable()">
+        <select id="sort" onchange="renderTable()">
+          <option value="symbol">Sort: Coin Name</option>
+          <option value="changeDesc">24h Change: Highest</option>
+          <option value="changeAsc">24h Change: Lowest</option>
+          <option value="volume">24h Volume: Highest</option>
+        </select>
+        <select id="limit" onchange="renderTable()">
+          <option value="50">Show 50</option>
+          <option value="100">Show 100</option>
+          <option value="all">Show All</option>
+        </select>
+      </div>
+
+      <div id="message" class="error" style="display:none; padding:12px 16px;"></div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Coin / Pair</th>
+              <th>Last Price (USDT)</th>
+              <th>24h Change</th>
+              <th class="trendHead">1D Trend</th>
+              <th class="trendHead">1H Trend</th>
+              <th>24h Volume</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr>
+              <td colspan="6" class="empty">Click “Scan market” to fetch live data.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="foot">
+      <span>Freedom with Arman · Binance Market Scanner</span>
+      <span id="updated">Last scan: Not run yet</span>
+    </div>
+  </main>
+</div>
+
 <script>
-const APIS=['https://api.binance.com','https://api-gcp.binance.com','https://api1.binance.com','https://data-api.binance.vision'];let records=[],page='up',busy=false;
-const MAX_PAIRS_TO_SCAN=Infinity;
-function fmtPrice(v){if(!Number.isFinite(v))return '—';return v>=1000?v.toLocaleString(undefined,{maximumFractionDigits:2}):v>=1?v.toLocaleString(undefined,{maximumFractionDigits:4}):v>=.01?v.toLocaleString(undefined,{maximumFractionDigits:6}):v.toLocaleString(undefined,{maximumFractionDigits:8})}
-function fmtVol(v){if(!Number.isFinite(v))return '—';if(v>=1e9)return (v/1e9).toFixed(2)+'B';if(v>=1e6)return (v/1e6).toFixed(2)+'M';if(v>=1e3)return (v/1e3).toFixed(1)+'K';return v.toFixed(0)}
-function sma(arr,n,end=arr.length){if(end<n)return NaN;let s=0;for(let i=end-n;i<end;i++)s+=arr[i];return s/n}
-function rsiSeries(closes,period=14){if(closes.length<period+2)return [];const out=Array(closes.length).fill(null);let gains=0,losses=0;for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>0)gains+=d;else losses-=d;}let avgGain=gains/period,avgLoss=losses/period;out[period]=avgLoss===0?(avgGain===0?50:100):100-(100/(1+avgGain/avgLoss));for(let i=period+1;i<closes.length;i++){const d=closes[i]-closes[i-1],gain=Math.max(d,0),loss=Math.max(-d,0);avgGain=((avgGain*(period-1))+gain)/period;avgLoss=((avgLoss*(period-1))+loss)/period;out[i]=avgLoss===0?(avgGain===0?50:100):100-(100/(1+avgGain/avgLoss));}return out;}
-function getRsiSignal(candles){const closes=candles.slice(0,-1).map(c=>+c[4]);const values=rsiSeries(closes,14).filter(Number.isFinite);if(values.length<2)return {value:null,signal:false};const previous=values.at(-2),current=values.at(-1);return {value:current,signal:previous<55&&current>55};}
-function classify(candles){const closes=candles.slice(0,-1).map(c=>+c[4]);if(closes.length<55)return 'range';const last=closes.at(-1),m20=sma(closes,20),m50=sma(closes,50),old20=sma(closes,20,closes.length-5);const recent=closes.slice(-20),hi=Math.max(...recent),lo=Math.min(...recent),width=(hi-lo)/(last||1);const slope=(m20-old20)/(old20||1);if(last>m20&&m20>m50&&slope>0.001)return 'up';if(last<m20&&m20<m50&&slope<-.001)return 'down';if(width<.08&&Math.abs(last/m20-1)<.025)return 'range';return 'mixed'}
-async function getJson(path){let lastError;for(const base of APIS){try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);const r=await fetch(base+path,{signal:controller.signal,cache:'no-store'});clearTimeout(timer);if(!r.ok){lastError=new Error(base+' response '+r.status);if(r.status===429||r.status===418)await new Promise(resolve=>setTimeout(resolve,2500));continue;}return await r.json()}catch(e){lastError=e}}throw new Error('All Binance data endpoints failed. '+(lastError?.message||''))}
-async function scanMarket(){if(busy)return;busy=true;const btn=document.getElementById('scanBtn'),status=document.getElementById('liveStatus'),msg=document.getElementById('message');btn.disabled=true;btn.innerHTML='<span class="loading"></span>Scanning…';status.textContent='● Loading public data';msg.style.display='none';try{
-const info=await getJson('/api/v3/exchangeInfo');const symbols=info.symbols.filter(s=>s.status==='TRADING'&&s.isSpotTradingAllowed&&s.quoteAsset==='USDT'&&!s.symbol.endsWith('UPUSDT')&&!s.symbol.endsWith('DOWNUSDT')&&!s.symbol.endsWith('BULLUSDT')&&!s.symbol.endsWith('BEARUSDT')).map(s=>s.symbol);
-const tickers=await getJson('/api/v3/ticker/24hr');const tmap=new Map(tickers.map(t=>[t.symbol,t]));const candidates=symbols.filter(s=>tmap.has(s)).sort((a,b)=>(+tmap.get(b).quoteVolume)-(+tmap.get(a).quoteVolume));const batchSize=4;let next=0,done=0,failed=0;const found=[];async function worker(){while(next<candidates.length){const symbol=candidates[next++];try{const [d,h]=await Promise.all([getJson('/api/v3/klines?symbol='+symbol+'&interval=1d&limit=60'),getJson('/api/v3/klines?symbol='+symbol+'&interval=1h&limit=60')]);const dt=classify(d),ht=classify(h),ticker=tmap.get(symbol);const previousD=classify(d.slice(0,-1)),previousH=classify(h.slice(0,-1));let category='mixed';if(dt===ht&&dt==='up')category='up';else if(dt===ht&&dt==='down')category='down';else if(dt==='range'||ht==='range')category='range';const wasAlreadyUptrend=(previousD==='up'&&previousH==='up');const trendSignal=(category==='up'&&!wasAlreadyUptrend);found.push({symbol,price:+ticker.lastPrice,change:+ticker.priceChangePercent,volume:+ticker.quoteVolume,daily:dt,hourly:ht,trendSignal,category});}catch(e){failed++;}finally{done++;status.textContent='● Scanning '+done.toLocaleString()+' / '+candidates.length.toLocaleString()+' pairs';document.getElementById('total').textContent=done.toLocaleString()+' / '+candidates.length.toLocaleString();}}}
-await Promise.all(Array.from({length:batchSize},worker));records=found;document.getElementById('total').textContent=candidates.length.toLocaleString();document.getElementById('upTotal').textContent=records.filter(x=>x.category==='up').length;document.getElementById('rangeTotal').textContent=records.filter(x=>x.category==='range').length;document.getElementById('downTotal').textContent=records.filter(x=>x.category==='down').length;document.getElementById('upCount').textContent=records.filter(x=>x.category==='up').length;document.getElementById('rangeCount').textContent=records.filter(x=>x.category==='range').length;document.getElementById('downCount').textContent=records.filter(x=>x.category==='down').length;document.getElementById('updated').textContent='Last scan: '+new Date().toLocaleString();status.textContent='● Scan complete · '+found.length.toLocaleString()+' loaded';if(failed) {msg.style.display='block';msg.textContent=failed+' pairs ka data load nahi hua; baqi '+found.length+' scan hue. Dobara scan karne se retry ho sakta hai.';}renderTable();
-}catch(e){status.textContent='● Connection issue';msg.style.display='block';msg.textContent='Binance se data load nahi ho saka. Internet check karein aur 30 seconds baad dobara Scan karein. Details: '+e.message;document.getElementById('rows').innerHTML='<tr><td colspan="7" class="empty">Live data could not be loaded. Please retry.</td></tr>';}finally{busy=false;btn.disabled=false;btn.textContent='↻ Scan market'}}
-function setPage(p){page=p;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.querySelectorAll('.trendHead').forEach(el=>el.style.display=p==='range'?'none':'');document.getElementById('rsiHead').style.display=p==='up'?'':'none';renderTable()}
-function badge(t){if(t==='up')return '<span class="badge up">↗ Uptrend</span>';if(t==='down')return '<span class="badge down">↘ Downtrend</span>';if(t==='range')return '<span class="badge range">↔ Ranging</span>';return '<span class="badge">Mixed</span>'}
-function renderTable(){const tbody=document.getElementById('rows'),q=document.getElementById('search').value.trim().toUpperCase(),sort=document.getElementById('sort').value,limit=document.getElementById('limit').value;let arr=records.filter(r=>r.category===page&&r.symbol.includes(q));if(sort==='changeDesc')arr.sort((a,b)=>b.change-a.change);else if(sort==='changeAsc')arr.sort((a,b)=>a.change-b.change);else if(sort==='volume')arr.sort((a,b)=>b.volume-a.volume);else arr.sort((a,b)=>a.symbol.localeCompare(b.symbol));if(limit!=='all')arr=arr.slice(0,+limit);if(!arr.length){const cols=page==='range'?4:page==='up'?7:6;tbody.innerHTML='<tr><td colspan="'+cols+'" class="empty">'+(records.length?'Is category mein abhi koi matching coin nahi mila.':'Scan market dabayein; live results yahan aayenge.')+'</td></tr>';return}tbody.innerHTML=arr.map(r=>`<tr><td><span class="coin">${r.symbol.replace('USDT','')}</span><span class="pair">${r.symbol}</span></td><td>${fmtPrice(r.price)}</td><td style="font-weight:700;color:${r.change>=0?'var(--green)':'var(--red)'}">${r.change>=0?'+':''}${r.change.toFixed(2)}%</td>${page==='range'?'':`<td>${badge(r.daily)}</td><td>${badge(r.hourly)}</td>`}${page==='up'?`<td>${r.trendSignal?'<span class="badge up">✓ NEW UPTREND SIGNAL</span>':'<span class="muted">No new signal</span>'}</td>`:''}<td>${fmtVol(r.volume)} USDT</td></tr>`).join('')}
-</script></body></html>
-```[cite: 1]
+const APIS = [
+  'https://api.binance.com',
+  'https://api-gcp.binance.com',
+  'https://api1.binance.com',
+  'https://data-api.binance.vision'
+];
+
+let records = [], page = 'up', busy = false;
+
+function fmtPrice(v) {
+  if (!Number.isFinite(v)) return '—';
+  return v >= 1000 ? v.toLocaleString(undefined, {maximumFractionDigits: 2}) :
+         v >= 1 ? v.toLocaleString(undefined, {maximumFractionDigits: 4}) :
+         v >= 0.01 ? v.toLocaleString(undefined, {maximumFractionDigits: 6}) :
+         v.toLocaleString(undefined, {maximumFractionDigits: 8});
+}
+
+function fmtVol(v) {
+  if (!Number.isFinite(v)) return '—';
+  if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return v.toFixed(0);
+}
+
+function sma(arr, n, end = arr.length) {
+  if (end < n) return NaN;
+  let s = 0;
+  for (let i = end - n; i < end; i++) s += arr[i];
+  return s / n;
+}
+
+function classify(candles) {
+  const closes = candles.slice(0, -1).map(c => +c[4]);
+  if (closes.length < 55) return 'range';
+
+  const last = closes.at(-1);
+  const m20 = sma(closes, 20);
+  const m50 = sma(closes, 50);
+  const old20 = sma(closes, 20, closes.length - 5);
+
+  const recent = closes.slice(-20);
+  const hi = Math.max(...recent);
+  const lo = Math.min(...recent);
+  const width = (hi - lo) / (last || 1);
+  const slope = (m20 - old20) / (old20 || 1);
+
+  if (last > m20 && m20 > m50 && slope > 0.001) return 'up';
+  if (last < m20 && m20 < m50 && slope < -0.001) return 'down';
+  if (width < 0.08 && Math.abs(last / m20 - 1) < 0.025) return 'range';
+
+  return 'mixed';
+}
+
+async function getJson(path) {
+  let lastErr;
+  for (const base of APIS) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      const r = await fetch(base + path, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      if (!r.ok) {
+        lastErr = new Error(`HTTP ${r.status}`);
+        if (r.status === 429 || r.status === 418) await new Promise(res => setTimeout(res, 2000));
+        continue;
+      }
+      return await r.json();
+    } catch(e) {
+      lastErr = e;
+    }
+  }
+  throw new Error('Binance public API unreachable: ' + (lastErr?.message || ''));
+}
+
+async function scanMarket() {
+  if (busy) return;
+  busy = true;
+
+  const btn = document.getElementById('scanBtn');
+  const status = document.getElementById('liveStatus');
+  const msg = document.getElementById('message');
+  const marketType = document.getElementById('marketType').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span>Scanning…';
+  status.textContent = '● Connecting to Binance';
+  msg.style.display = 'none';
+
+  try {
+    let symbols = [];
+    let tickers = [];
+
+    if (marketType === 'spot') {
+      // SPOT MARKET INFO & TICKERS
+      const info = await getJson('/api/v3/exchangeInfo');
+      symbols = info.symbols
+        .filter(s => s.status === 'TRADING' && 
+                     s.isSpotTradingAllowed && 
+                     s.quoteAsset === 'USDT' && 
+                     !s.symbol.endsWith('UPUSDT') && 
+                     !s.symbol.endsWith('DOWNUSDT') && 
+                     !s.symbol.endsWith('BULLUSDT') && 
+                     !s.symbol.endsWith('BEARUSDT'))
+        .map(s => s.symbol);
+
+      tickers = await getJson('/api/v3/ticker/24hr');
+    } else {
+      // FUTURES MARKET INFO & TICKERS (Binance Futures API endpoint)
+      const fInfo = await fetch('https://fapi.binance.com/fapi/v1/exchangeInfo').then(r => r.json());
+      symbols = fInfo.symbols
+        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDT')
+        .map(s => s.symbol);
+
+      tickers = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr').then(r => r.json());
+    }
+
+    const tmap = new Map(tickers.map(t => [t.symbol, t]));
+    const candidates = symbols.filter(s => tmap.has(s))
+                              .sort((a,b) => (+tmap.get(b).quoteVolume) - (+tmap.get(a).quoteVolume));
+
+    const batchSize = 4;
+    let next = 0, done = 0, failed = 0;
+    const found = [];
+    const klineBaseUrl = marketType === 'spot' ? '/api/v3/klines?symbol=' : 'https://fapi.binance.com/fapi/v1/klines?symbol=';
+
+    async function worker() {
+      while (next < candidates.length) {
+        const symbol = candidates[next++];
+        try {
+          const [d, h] = await Promise.all([
+            getJson(marketType === 'spot' ? `/api/v3/klines?symbol=${symbol}&interval=1d&limit=60` : `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=60`),
+            getJson(marketType === 'spot' ? `/api/v3/klines?symbol=${symbol}&interval=1h&limit=60` : `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1h&limit=60`)
+          ]);
+
+          const dt = classify(d);
+          const ht = classify(h);
+          const ticker = tmap.get(symbol);
+
+          let category = 'mixed';
+          if (dt === 'up' && ht === 'up') category = 'up';
+          else if (dt === 'down' && ht === 'down') category = 'down';
+          else if (dt === 'range' || ht === 'range') category = 'range';
+
+          if (category !== 'mixed') {
+            found.push({
+              symbol,
+              price: +ticker.lastPrice,
+              change: +ticker.priceChangePercent,
+              volume: +ticker.quoteVolume,
+              daily: dt,
+              hourly: ht,
+              category
+            });
+          }
+        } catch(e) {
+          failed++;
+        } finally {
+          done++;
+          status.textContent = `● Scanning ${done} / ${candidates.length} pairs`;
+          document.getElementById('total').textContent = `${done} / ${candidates.length}`;
+        }
+      }
+    }
+
+    await Promise.all(Array.from({length: batchSize}, worker));
+
+    records = found;
+    
+    const upCount = records.filter(x => x.category === 'up').length;
+    const rangeCount = records.filter(x => x.category === 'range').length;
+    const downCount = records.filter(x => x.category === 'down').length;
+
+    document.getElementById('total').textContent = candidates.length.toLocaleString();
+    document.getElementById('upTotal').textContent = upCount.toLocaleString();
+    document.getElementById('rangeTotal').textContent = rangeCount.toLocaleString();
+    document.getElementById('downTotal').textContent = downCount.toLocaleString();
+
+    document.getElementById('upCount').textContent = upCount;
+    document.getElementById('rangeCount').textContent = rangeCount;
+    document.getElementById('downCount').textContent = downCount;
+
+    document.getElementById('updated').textContent = 'Last scan: ' + new Date().toLocaleTimeString();
+    status.textContent = `● Scan complete · ${records.length} categorized`;
+
+    if (failed) {
+      msg.style.display = 'block';
+      msg.textContent = `${failed} pairs ka data load nahi ho saka.`;
+    }
+
+    renderTable();
+
+  } catch(e) {
+    status.textContent = '● Connection issue';
+    msg.style.display = 'block';
+    msg.textContent = 'Binance se live data fetch nahi ho saka. ' + e.message;
+    document.getElementById('rows').innerHTML = '<tr><td colspan="6" class="empty">Live data load nahi ho saka. Retry karein.</td></tr>';
+  } finally {
+    busy = false;
+    btn.disabled = false;
+    btn.textContent = '↻ Scan market';
+  }
+}
+
+function setPage(p) {
+  page = p;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+  document.querySelectorAll('.trendHead').forEach(el => el.style.display = p === 'range' ? 'none' : '');
+  renderTable();
+}
+
+function badge(t) {
+  if (t === 'up') return '<span class="badge up">↗ Uptrend</span>';
+  if (t === 'down') return '<span class="badge down">↘ Downtrend</span>';
+  if (t === 'range') return '<span class="badge range">↔ Ranging</span>';
+  return '<span class="badge">Mixed</span>';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('rows');
+  const q = document.getElementById('search').value.trim().toUpperCase();
+  const sort = document.getElementById('sort').value;
+  const limit = document.getElementById('limit').value;
+
+  let arr = records.filter(r => r.category === page && r.symbol.includes(q));
+
+  if (sort === 'changeDesc') arr.sort((a,b) => b.change - a.change);
+  else if (sort === 'changeAsc') arr.sort((a,b) => a.change - b.change);
+  else if (sort === 'volume') arr.sort((a,b) => b.volume - a.volume);
+  else arr.sort((a,b) => a.symbol.localeCompare(b.symbol));
+
+  if (limit !== 'all') arr = arr.slice(0, +limit);
+
+  if (!arr.length) {
+    const cols = page === 'range' ? 4 : 6;
+    tbody.innerHTML = `<tr><td colspan="${cols}" class="empty">${records.length ? 'Is category mein abhi koi coin match nahi hua.' : '“Scan market” par click karein live data ke liye.'}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = arr.map(r => `
+    <tr>
+      <td><span class="coin">${r.symbol.replace('USDT','')}</span><span class="pair">${r.symbol}</span></td>
+      <td>${fmtPrice(r.price)}</td>
+      <td style="font-weight:700; color:${r.change >= 0 ? 'var(--green)' : 'var(--red)'}">
+        ${r.change >= 0 ? '+' : ''}${r.change.toFixed(2)}%
+      </td>
+      ${page === 'range' ? '' : `<td>${badge(r.daily)}</td><td>${badge(r.hourly)}</td>`}
+      <td>${fmtVol(r.volume)} USDT</td>
+    </tr>
+  `).join('');
+}
+</script>
+</body>
+</html>
