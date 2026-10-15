@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Freedom with Arman — Market Scanner</title>
+<title>Freedom with Arman — Spot Market Scanner</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -51,9 +51,8 @@ button, select, input { font: inherit; }
 button { border: 0; cursor: pointer; }
 .refresh { background: var(--accent); color: white; padding: 11px 16px; border-radius: 11px; font-weight: 700; }
 .refresh:disabled { opacity: .55; cursor: wait; }
-.scan-config { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; background: var(--panel); padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
-.scan-config label { font-size: 13px; font-weight: 700; color: var(--muted); }
-.scan-config select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.notice { background: var(--panel2); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+.notice strong { color: var(--text); }
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
 .stat, .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
 .stat { padding: 16px; }
@@ -102,7 +101,7 @@ tbody tr:hover { background: var(--panel2); }
         <div class="logo">FA</div>
         <div>
           <h1>Freedom with Arman</h1>
-          <p>Binance Market Scanner · Spot Trend Dashboard</p>
+          <p>Binance Spot Market Scanner</p>
         </div>
       </div>
       <div class="status" id="liveStatus">● Ready to scan</div>
@@ -113,24 +112,19 @@ tbody tr:hover { background: var(--panel2); }
     <div class="intro">
       <div>
         <h2>Spot Trend Dashboard</h2>
-        <p>Multi-timeframe trend filter (1D + 1H)</p>
+        <p>Sirf Active Binance Spot USDT Pairs (Futures Excluded)</p>
       </div>
       <button class="refresh" id="scanBtn" onclick="scanMarket()">↻ Scan market</button>
     </div>
 
-    <!-- Scanner Market Type Selector Option -->
-    <div class="scan-config">
-      <label for="marketType">Market Mode:</label>
-      <select id="marketType">
-        <option value="spot" selected>🟢 Only Spot Market (No Futures)</option>
-        <option value="futures">🔴 Futures Market (Perpetual)</option>
-      </select>
-      <span style="font-size:12px; color:var(--muted); margin-left:auto;">(Spot mode excludes futures & leveraged tokens automatically)</span>
+    <!-- Rule Notice -->
+    <div class="notice" id="ruleNotice">
+      <strong>Uptrend Page Rule:</strong> Scanner sirf unhi coins ko scan karke dikhayega jo <strong>1 Day (1D)</strong> aur <strong>1 Hour (1H)</strong> dono timeframes par Uptrend mein honge.
     </div>
 
     <!-- Summary Stats -->
     <div class="stats">
-      <div class="stat"><span class="label">Pairs Checked</span><strong id="total">—</strong><small>Active Markets</small></div>
+      <div class="stat"><span class="label">Spot Pairs Checked</span><strong id="total">—</strong><small>Active USDT Markets</small></div>
       <div class="stat"><span class="label">Uptrend (1D + 1H)</span><strong id="upTotal">—</strong><small>Both timeframes bullish</small></div>
       <div class="stat"><span class="label">Ranging Market</span><strong id="rangeTotal">—</strong><small>Consolidation state</small></div>
       <div class="stat"><span class="label">Downtrend (1D + 1H)</span><strong id="downTotal">—</strong><small>Both timeframes bearish</small></div>
@@ -176,7 +170,7 @@ tbody tr:hover { background: var(--panel2); }
           </thead>
           <tbody id="rows">
             <tr>
-              <td colspan="6" class="empty">Click “Scan market” to fetch live data.</td>
+              <td colspan="6" class="empty">Click “Scan market” to fetch live Spot data.</td>
             </tr>
           </tbody>
         </table>
@@ -184,7 +178,7 @@ tbody tr:hover { background: var(--panel2); }
     </section>
 
     <div class="foot">
-      <span>Freedom with Arman · Binance Market Scanner</span>
+      <span>Freedom with Arman · Spot Market Scanner</span>
       <span id="updated">Last scan: Not run yet</span>
     </div>
   </main>
@@ -273,41 +267,26 @@ async function scanMarket() {
   const btn = document.getElementById('scanBtn');
   const status = document.getElementById('liveStatus');
   const msg = document.getElementById('message');
-  const marketType = document.getElementById('marketType').value;
 
   btn.disabled = true;
   btn.innerHTML = '<span class="loading"></span>Scanning…';
-  status.textContent = '● Connecting to Binance';
+  status.textContent = '● Connecting to Binance Spot';
   msg.style.display = 'none';
 
   try {
-    let symbols = [];
-    let tickers = [];
+    // STRICTLY SPOT MARKET ONLY (No Futures)
+    const info = await getJson('/api/v3/exchangeInfo');
+    const symbols = info.symbols
+      .filter(s => s.status === 'TRADING' && 
+                   s.isSpotTradingAllowed && 
+                   s.quoteAsset === 'USDT' && 
+                   !s.symbol.endsWith('UPUSDT') && 
+                   !s.symbol.endsWith('DOWNUSDT') && 
+                   !s.symbol.endsWith('BULLUSDT') && 
+                   !s.symbol.endsWith('BEARUSDT'))
+      .map(s => s.symbol);
 
-    if (marketType === 'spot') {
-      // SPOT MARKET INFO & TICKERS
-      const info = await getJson('/api/v3/exchangeInfo');
-      symbols = info.symbols
-        .filter(s => s.status === 'TRADING' && 
-                     s.isSpotTradingAllowed && 
-                     s.quoteAsset === 'USDT' && 
-                     !s.symbol.endsWith('UPUSDT') && 
-                     !s.symbol.endsWith('DOWNUSDT') && 
-                     !s.symbol.endsWith('BULLUSDT') && 
-                     !s.symbol.endsWith('BEARUSDT'))
-        .map(s => s.symbol);
-
-      tickers = await getJson('/api/v3/ticker/24hr');
-    } else {
-      // FUTURES MARKET INFO & TICKERS (Binance Futures API endpoint)
-      const fInfo = await fetch('https://fapi.binance.com/fapi/v1/exchangeInfo').then(r => r.json());
-      symbols = fInfo.symbols
-        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDT')
-        .map(s => s.symbol);
-
-      tickers = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr').then(r => r.json());
-    }
-
+    const tickers = await getJson('/api/v3/ticker/24hr');
     const tmap = new Map(tickers.map(t => [t.symbol, t]));
     const candidates = symbols.filter(s => tmap.has(s))
                               .sort((a,b) => (+tmap.get(b).quoteVolume) - (+tmap.get(a).quoteVolume));
@@ -315,15 +294,14 @@ async function scanMarket() {
     const batchSize = 4;
     let next = 0, done = 0, failed = 0;
     const found = [];
-    const klineBaseUrl = marketType === 'spot' ? '/api/v3/klines?symbol=' : 'https://fapi.binance.com/fapi/v1/klines?symbol=';
 
     async function worker() {
       while (next < candidates.length) {
         const symbol = candidates[next++];
         try {
           const [d, h] = await Promise.all([
-            getJson(marketType === 'spot' ? `/api/v3/klines?symbol=${symbol}&interval=1d&limit=60` : `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=60`),
-            getJson(marketType === 'spot' ? `/api/v3/klines?symbol=${symbol}&interval=1h&limit=60` : `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1h&limit=60`)
+            getJson(`/api/v3/klines?symbol=${symbol}&interval=1d&limit=60`),
+            getJson(`/api/v3/klines?symbol=${symbol}&interval=1h&limit=60`)
           ]);
 
           const dt = classify(d);
@@ -331,6 +309,7 @@ async function scanMarket() {
           const ticker = tmap.get(symbol);
 
           let category = 'mixed';
+          // Strictly checking 1D and 1H for Uptrend or Downtrend
           if (dt === 'up' && ht === 'up') category = 'up';
           else if (dt === 'down' && ht === 'down') category = 'down';
           else if (dt === 'range' || ht === 'range') category = 'range';
@@ -399,6 +378,16 @@ function setPage(p) {
   page = p;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.page === p));
   document.querySelectorAll('.trendHead').forEach(el => el.style.display = p === 'range' ? 'none' : '');
+  
+  const notice = document.getElementById('ruleNotice');
+  if (p === 'up') {
+    notice.innerHTML = '<strong>Uptrend Page Rule:</strong> Sirf wahi coins dikhenge jo <strong>1 Day (1D)</strong> aur <strong>1 Hour (1H)</strong> dono timeframes par Uptrend mein honge.';
+  } else if (p === 'down') {
+    notice.innerHTML = '<strong>Downtrend Page Rule:</strong> Sirf wahi coins dikhenge jo <strong>1 Day (1D)</strong> aur <strong>1 Hour (1H)</strong> dono timeframes par Downtrend mein honge.';
+  } else {
+    notice.innerHTML = '<strong>Ranging Market Rule:</strong> Yeh page consolidation market wale coins dikhata hai.';
+  }
+
   renderTable();
 }
 
