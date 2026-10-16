@@ -1,336 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freedom with Arman | Binance Spot Scanner</title>
-
-<style>
-*{box-sizing:border-box}
-body{
- margin:0;
- font-family:Arial,sans-serif;
- background:#0b1220;
- color:#f1f5f9
-}
-header{
- background:#111c30;
- padding:22px 12px;
- text-align:center;
- border-bottom:2px solid #f0b90b
-}
-h1{color:#f0b90b;margin:0 0 8px}
-header p{color:#cbd5e1;margin:0}
-.container{max-width:1100px;margin:auto;padding:18px}
-button,input{
- padding:12px;
- border-radius:8px;
- border:1px solid #334155;
- font-size:15px
-}
-button{
- cursor:pointer;
- font-weight:bold;
- background:#f0b90b;
- color:#111827;
- border:0
-}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
-input{flex:1;min-width:180px;background:#111c30;color:white}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:120px}
-.tabs button.active{background:#22c55e;color:#052e16}
-.status{color:#cbd5e1;margin:15px 0}
-table{width:100%;border-collapse:collapse;background:#111c30}
-th,td{padding:12px 8px;text-align:left;border-bottom:1px solid #293548}
-th{color:#f0b90b}
-.up{color:#4ade80}
-.range{color:#facc15}
-.down{color:#f87171}
-.table-wrap{overflow-x:auto;border-radius:10px}
-footer{text-align:center;padding:25px;color:#94a3b8}
-.note{font-size:13px;color:#94a3b8;line-height:1.6}
-@media(max-width:600px){
- th,td{padding:9px 5px;font-size:13px}
- header{padding:18px 8px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom with Arman - Binance Spot Scanner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- TradingView Widget -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0e14;
+            color: #f3f4f6;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
 
-<body>
-<header>
- <h1>💰 Freedom with Arman</h1>
- <p>Binance Spot Crypto Market Scanner</p>
-</header>
+    <!-- Top Bar -->
+    <div class="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-black font-semibold text-xs py-1.5 px-4 text-center tracking-wide flex items-center justify-center gap-2">
+        <i data-lucide="zap" class="w-4 h-4 fill-black"></i>
+        <span>FREEDOM WITH ARMAN - Live Binance Spot Market Trend Scanner</span>
+    </div>
 
-<div class="container">
- <div class="controls">
-  <button id="scanBtn" onclick="startScan()">🔄 Scan Spot Coins</button>
-  <input id="search" placeholder="Search coin, e.g. BTCUSDT"
-         oninput="renderTable()">
- </div>
+    <!-- Header -->
+    <header class="border-b border-gray-800/80 bg-gray-900/60 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 text-gray-950 font-black text-xl tracking-tighter">
+                    FA
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl sm:text-2xl tracking-tight text-white flex items-center gap-2">
+                        Freedom <span class="text-amber-400">with Arman</span>
+                    </h1>
+                    <p class="text-xs text-gray-400 font-medium flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Binance Spot Only (USDT Pairs)
+                    </p>
+                </div>
+            </div>
 
- <div class="tabs">
-  <button class="active" onclick="changeTab('up',this)">
-   🟢 Uptrend
-  </button>
-  <button onclick="changeTab('range',this)">
-   🟡 Ranging Market
-  </button>
-  <button onclick="changeTab('down',this)">
-   🔴 Downtrend
-  </button>
- </div>
+            <div class="hidden md:flex items-center gap-6 border-x border-gray-800 px-6 py-2">
+                <div class="text-xs">
+                    <span class="text-gray-400 block">BTC Status</span>
+                    <span id="btc-price" class="font-bold text-gray-200">Fetching...</span>
+                </div>
+                <div class="text-xs">
+                    <span class="text-gray-400 block">Total Pairs</span>
+                    <span id="total-pairs" class="font-bold text-amber-400">--</span>
+                </div>
+                <div class="text-xs">
+                    <span class="text-gray-400 block">Scan Progress</span>
+                    <span id="scan-progress-text" class="font-bold text-emerald-400">0%</span>
+                </div>
+            </div>
 
- <div id="status" class="status">Click Scan Spot Coins to start.</div>
+            <div class="flex items-center gap-3">
+                <button id="refresh-btn" onclick="startScanning()" class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold transition flex items-center gap-2 border border-gray-700">
+                    <i data-lucide="rotate-cw" id="refresh-icon" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Rescan Market</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
- <div class="table-wrap">
-  <table>
-   <thead>
-    <tr>
-     <th>#</th>
-     <th>Coin</th>
-     <th>Price (USDT)</th>
-     <th>24h Change</th>
-     <th>Market Trend</th>
-    </tr>
-   </thead>
-   <tbody id="results">
-    <tr><td colspan="5">No scan results yet.</td></tr>
-   </tbody>
-  </table>
- </div>
+    <!-- Navigation Tabs -->
+    <section class="border-b border-gray-800 bg-gray-950/40 sticky top-20 z-30 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-2 sm:space-x-8 overflow-x-auto py-3 no-scrollbar" aria-label="Tabs">
+                
+                <button onclick="switchTab('uptrend')" id="tab-uptrend" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    <span>Up Trend (EMA 9/33 Cross)</span>
+                    <span class="text-xs bg-emerald-500/20 px-2 py-0.5 rounded-full font-mono text-emerald-300" id="badge-uptrend">0</span>
+                    <span class="text-[10px] text-gray-400 font-normal ml-1 border-l border-gray-700 pl-2">1H Bullish Cross</span>
+                </button>
 
- <p class="note">
-  Uptrend: 1-hour EMA20 above EMA50, with price above EMA20.<br>
-  Ranging: 24-hour price change within ±1.5%, with a limited
-  high-low range. This uses 24-hour ticker statistics, not a
-  candle-timeframe filter.<br>
-  Downtrend: 1-day and 1-hour EMA20 below EMA50, with price
-  below EMA20.<br>
-  This scanner provides technical classifications, not financial
-  advice. Market conditions can change quickly.
- </p>
-</div>
+                <button onclick="switchTab('ranging')" id="tab-ranging" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border border-transparent">
+                    <i data-lucide="activity" class="w-4 h-4"></i>
+                    <span>Ranging Market</span>
+                    <span class="text-xs bg-amber-500/20 px-2 py-0.5 rounded-full font-mono text-amber-300" id="badge-ranging">0</span>
+                    <span class="text-[10px] text-gray-400 font-normal ml-1 border-l border-gray-700 pl-2">Sideways</span>
+                </button>
 
-<footer>© Freedom with Arman</footer>
+                <button onclick="switchTab('downtrend')" id="tab-downtrend" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border border-transparent">
+                    <i data-lucide="trending-down" class="w-4 h-4"></i>
+                    <span>Down Trend (1H RSI 20-30)</span>
+                    <span class="text-xs bg-rose-500/20 px-2 py-0.5 rounded-full font-mono text-rose-300" id="badge-downtrend">0</span>
+                    <span class="text-[10px] text-gray-400 font-normal ml-1 border-l border-gray-700 pl-2">1H RSI 20-30 Only</span>
+                </button>
 
-<script>
-const API = "https://api.binance.com";
-let activeTab = "up";
-let coins = [];
-let busy = false;
+            </nav>
+        </div>
+    </section>
 
-function changeTab(tab, button) {
- activeTab = tab;
- document.querySelectorAll(".tabs button").forEach(b =>
-  b.classList.remove("active")
- );
- button.classList.add("active");
- renderTable();
-}
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        
+        <!-- Controls Bar -->
+        <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+            <div class="relative w-full sm:w-80">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="search-input" oninput="filterCoins()" placeholder="Search coin symbol (e.g. BTC, ETH)..." class="w-full bg-gray-900 border border-gray-800 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-500/50 transition">
+            </div>
 
-async function getJSON(path) {
- const response = await fetch(API + path);
- if (!response.ok) throw new Error("Binance API error: " + response.status);
- return response.json();
-}
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end text-sm text-gray-400">
+                <span class="text-xs">Sort By:</span>
+                <select id="sort-select" onchange="renderCoins()" class="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-amber-500">
+                    <option value="gainers">Top 24h Change</option>
+                    <option value="volume">Highest Volume</option>
+                    <option value="symbol">Coin Name (A-Z)</option>
+                </select>
+            </div>
+        </div>
 
-async function getCandles(symbol, interval) {
- const data = await getJSON(
-  "/api/v3/klines?symbol=" + symbol +
-  "&interval=" + interval + "&limit=60"
- );
- return data;
-}
+        <!-- Scanning Progress -->
+        <div id="progress-container" class="mb-6 bg-gray-900/80 border border-gray-800 rounded-xl p-4 backdrop-blur">
+            <div class="flex items-center justify-between text-xs mb-2">
+                <span class="text-gray-300 font-medium flex items-center gap-2">
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-amber-400"></i>
+                    Scanning Binance Spot Market...
+                </span>
+                <span id="scan-count" class="text-gray-400 font-mono">0 / 0 Coins</span>
+            </div>
+            <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+        </div>
 
-function ema(values, period) {
- if (values.length < period) return null;
- let result = values.slice(0,period).reduce((a,b)=>a+b,0)/period;
- const multiplier = 2/(period+1);
- for(let i=period;i<values.length;i++){
-  result = values[i]*multiplier + result*(1-multiplier);
- }
- return result;
-}
+        <!-- Tab Description Banner -->
+        <div id="tab-banner" class="mb-6 p-4 rounded-xl border bg-gray-900/40 backdrop-blur flex items-start gap-3 border-emerald-500/20">
+            <i id="banner-icon" data-lucide="trending-up" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+            <div>
+                <h3 id="banner-title" class="text-sm font-bold text-gray-200">Up Trend Signals (EMA 9 & 33 Crossover)</h3>
+                <p id="banner-desc" class="text-xs text-gray-400 mt-0.5">Showing coins on 1-Hour timeframe where EMA 9 has crossed EMA 33 from bottom to top (Bullish Crossover Signal).</p>
+            </div>
+        </div>
 
-async function trend(symbol, interval) {
- const candles = await getCandles(symbol,interval);
+        <!-- Coins Container -->
+        <div id="coins-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
- // Ignore the currently forming candle.
- const completed = candles.slice(0,-1);
- const closes = completed.map(c=>Number(c[4]));
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16 bg-gray-900/30 border border-dashed border-gray-800 rounded-2xl">
+            <i data-lucide="filter-x" class="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+            <h3 class="text-gray-300 font-semibold text-base">No Coins Match Criteria</h3>
+            <p class="text-gray-500 text-xs mt-1">Try adjusting your search query or trigger a rescan.</p>
+        </div>
 
- if(closes.length < 50) return "unknown";
+    </main>
 
- const last = closes[closes.length-1];
- const e20 = ema(closes,20);
- const e50 = ema(closes,50);
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/80 bg-gray-950 py-6 mt-12 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <span class="font-bold text-gray-300">Freedom with Arman</span> &copy; 2026. All rights reserved.
+            </div>
+            <div class="flex items-center gap-4 text-gray-400">
+                <span>Spot Market Only</span>
+                <span>•</span>
+                <span>EMA & RSI Filter Engine</span>
+            </div>
+        </div>
+    </footer>
 
- if(e20===null || e50===null) return "unknown";
+    <!-- TradingView Chart Modal -->
+    <div id="chart-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-gray-950">
+                <div class="flex items-center gap-3">
+                    <span id="modal-coin-title" class="font-bold text-lg text-white">BTC/USDT</span>
+                    <span id="modal-coin-trend" class="text-xs px-2.5 py-0.5 rounded-full font-semibold">UP TREND</span>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white p-2 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-grow w-full h-full bg-gray-950" id="tv-chart-container"></div>
+        </div>
+    </div>
 
- if(e20>e50 && last>e20) return "up";
- if(e20<e50 && last<e20) return "down";
- return "other";
-}
+    <!-- JavaScript Logic -->
+    <script>
+        let currentTab = 'uptrend';
+        let allSpotPairs = [];
+        let scannedData = {
+            uptrend: [],
+            ranging: [],
+            downtrend: []
+        };
+        let isScanning = false;
 
-async function startScan() {
- if(busy) return;
- busy = true;
- const button = document.getElementById("scanBtn");
- button.disabled = true;
- coins = [];
- renderTable();
+        lucide.createIcons();
 
- try {
-  document.getElementById("status").textContent =
-   "Loading Binance Spot pairs...";
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchBTCStatus();
+            startScanning();
+        });
 
-  const [info,tickers] = await Promise.all([
-   getJSON("/api/v3/exchangeInfo"),
-   getJSON("/api/v3/ticker/24hr")
-  ]);
+        async function fetchBTCStatus() {
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+                const data = await res.json();
+                const price = parseFloat(data.lastPrice).toLocaleString();
+                const change = parseFloat(data.priceChangePercent).toFixed(2);
+                const isPositive = change >= 0;
+                
+                document.getElementById('btc-price').innerHTML = `
+                    $${price} <span class="${isPositive ? 'text-emerald-400' : 'text-rose-400'}">(${isPositive ? '+' : ''}${change}%)</span>
+                `;
+            } catch (e) {
+                document.getElementById('btc-price').innerText = '$--';
+            }
+        }
 
-  const tickerMap = new Map(tickers.map(t=>[t.symbol,t]));
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 border border-transparent';
+            });
 
-  // Spot trading pairs only. Excludes futures.
-  const pairs = info.symbols.filter(s =>
-   s.status==="TRADING" &&
-   s.isSpotTradingAllowed===true &&
-   s.quoteAsset==="USDT" &&
-   s.baseAsset!== "USDT"
-  );
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            const bannerTitle = document.getElementById('banner-title');
+            const bannerDesc = document.getElementById('banner-desc');
+            const bannerIcon = document.getElementById('banner-icon');
 
-  document.getElementById("status").textContent =
-   "Found " + pairs.length +
-   " Binance Spot USDT pairs. Scanning...";
+            if (tab === 'uptrend') {
+                activeBtn.className = 'tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+                bannerTitle.innerText = 'Up Trend Coins (EMA 9 & 33 Crossover)';
+                bannerDesc.innerText = 'Showing coins on 1-Hour timeframe where EMA 9 crossed EMA 33 from bottom to top.';
+                bannerIcon.className = 'w-5 h-5 text-emerald-400 shrink-0 mt-0.5';
+            } else if (tab === 'ranging') {
+                activeBtn.className = 'tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap bg-amber-500/10 text-amber-400 border border-amber-500/30';
+                bannerTitle.innerText = 'Ranging / Sideways Coins';
+                bannerDesc.innerText = 'Showing coins in consolidation zones with low volatility and sideways movement.';
+                bannerIcon.className = 'w-5 h-5 text-amber-400 shrink-0 mt-0.5';
+            } else if (tab === 'downtrend') {
+                activeBtn.className = 'tab-btn px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all whitespace-nowrap bg-rose-500/10 text-rose-400 border border-rose-500/30';
+                bannerTitle.innerText = 'Down Trend Coins (1-Hour RSI 20-30)';
+                bannerDesc.innerText = 'Showing coins strictly where 1-Hour RSI is between 20 and 30 (Oversold Area).';
+                bannerIcon.className = 'w-5 h-5 text-rose-400 shrink-0 mt-0.5';
+            }
 
-  let done = 0;
-  const concurrency = 4;
-  let next = 0;
+            renderCoins();
+        }
 
-  async function worker() {
-   while(next < pairs.length) {
-    const index = next++;
-    const pair = pairs[index];
-    const ticker = tickerMap.get(pair.symbol);
+        // EMA Calculation
+        function calculateEMAArray(prices, period) {
+            if (prices.length < period) return [];
+            const k = 2 / (period + 1);
+            let emaArray = [];
+            let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+            
+            for (let i = period - 1; i < prices.length; i++) {
+                if (i === period - 1) {
+                    emaArray.push(ema);
+                } else {
+                    ema = (prices[i] * k) + (ema * (1 - k));
+                    emaArray.push(ema);
+                }
+            }
+            return emaArray;
+        }
 
-    if(!ticker) {
-     done++;
-     continue;
-    }
+        // RSI Calculation (14 Period)
+        function calculateRSI(prices, period = 14) {
+            if (prices.length < period + 1) return null;
+            let gains = 0;
+            let losses = 0;
 
-    const item = {
-     symbol:pair.symbol,
-     price:Number(ticker.lastPrice),
-     change:Number(ticker.priceChangePercent),
-     up:false,
-     range:false,
-     down:false
-    };
+            for (let i = 1; i <= period; i++) {
+                const diff = prices[i] - prices[i - 1];
+                if (diff >= 0) gains += diff;
+                else losses -= diff;
+            }
 
-    try {
-     // Uptrend: only 1-hour condition.
-     const h1 = await trend(pair.symbol,"1h");
-     item.up = h1==="up";
+            let avgGain = gains / period;
+            let avgLoss = losses / period;
 
-     // Downtrend: both daily and hourly must agree.
-     const daily = await trend(pair.symbol,"1d");
-     item.down = h1==="down" && daily==="down";
-    } catch(error) {
-     // Failed requests are skipped rather than guessed.
-    }
+            for (let i = period + 1; i < prices.length; i++) {
+                const diff = prices[i] - prices[i - 1];
+                if (diff >= 0) {
+                    avgGain = (avgGain * 13 + diff) / 14;
+                    avgLoss = (avgLoss * 13) / 14;
+                } else {
+                    avgGain = (avgGain * 13) / 14;
+                    avgLoss = (avgLoss * 13 - diff) / 14;
+                }
+            }
 
-    // Ranging uses 24-hour ticker data, not candle intervals.
-    const high = Number(ticker.highPrice);
-    const low = Number(ticker.lowPrice);
-    const last = Number(ticker.lastPrice);
-    const rangePct = last>0 ? ((high-low)/last)*100 : 999;
+            if (avgLoss === 0) return 100;
+            const rs = avgGain / avgLoss;
+            return 100 - (100 / (1 + rs));
+        }
 
-    item.range =
-     Math.abs(item.change)<=1.5 &&
-     rangePct<=5;
+        async function startScanning() {
+            if (isScanning) return;
+            isScanning = true;
 
-    coins.push(item);
-    done++;
+            const refreshIcon = document.getElementById('refresh-icon');
+            refreshIcon.classList.add('animate-spin');
+            
+            scannedData = { uptrend: [], ranging: [], downtrend: [] };
+            updateBadges();
+            
+            document.getElementById('progress-container').classList.remove('hidden');
 
-    if(done%10===0 || done===pairs.length) {
-     document.getElementById("status").textContent =
-      "Scanning Spot pairs: " + done + " / " + pairs.length;
-     renderTable();
-    }
+            try {
+                const exchangeRes = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+                const exchangeData = await exchangeRes.json();
+                
+                allSpotPairs = exchangeData.symbols
+                    .filter(s => s.status === 'TRADING' && s.isSpotTradingAllowed && s.quoteAsset === 'USDT' && !s.symbol.includes('DOWN') && !s.symbol.includes('UP'))
+                    .map(s => s.symbol);
 
-    // Small pause helps reduce API request bursts.
-    await new Promise(resolve=>setTimeout(resolve,80));
-   }
-  }
+                document.getElementById('total-pairs').innerText = allSpotPairs.length;
 
-  await Promise.all(
-   Array.from({length:concurrency},()=>worker())
-  );
+                const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+                const tickerData = await tickerRes.json();
+                const tickerMap = new Map();
+                tickerData.forEach(t => tickerMap.set(t.symbol, t));
 
-  renderTable();
-  document.getElementById("status").textContent =
-   "Scan complete. Checked " + done +
-   " pairs. Results may be incomplete if API requests failed.";
+                const batchSize = 100; 
+                const topPairs = allSpotPairs
+                    .filter(sym => tickerMap.has(sym))
+                    .sort((a, b) => parseFloat(tickerMap.get(b).quoteVolume) - parseFloat(tickerMap.get(a).quoteVolume))
+                    .slice(0, batchSize);
 
- } catch(error) {
-  document.getElementById("status").textContent =
-   "Connection error: " + error.message +
-   ". Check your internet connection and try again.";
- } finally {
-  busy = false;
-  button.disabled = false;
- }
-}
+                let completed = 0;
 
-function renderTable() {
- const query = document.getElementById("search").value
-  .trim().toUpperCase();
- const body = document.getElementById("results");
+                for (let symbol of topPairs) {
+                    const stats = tickerMap.get(symbol);
+                    const price = parseFloat(stats.lastPrice);
+                    const change = parseFloat(stats.priceChangePercent);
+                    const volume = parseFloat(stats.quoteVolume);
 
- let filtered = coins.filter(c=>c.symbol.includes(query));
+                    // Fetch 1H Klines
+                    const klines1HRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=80`);
+                    const klines1HData = await klines1HRes.json();
+                    const closes1H = klines1HData.map(c => parseFloat(c[4]));
 
- if(activeTab==="up") filtered=filtered.filter(c=>c.up);
- if(activeTab==="range") filtered=filtered.filter(c=>c.range);
- if(activeTab==="down") filtered=filtered.filter(c=>c.down);
+                    // Indicators (1H Timeframe)
+                    const ema9_1h_arr = calculateEMAArray(closes1H, 9);
+                    const ema33_1h_arr = calculateEMAArray(closes1H, 33);
+                    const rsi1H = calculateRSI(closes1H, 14);
 
- filtered.sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+                    if (ema9_1h_arr.length >= 2 && ema33_1h_arr.length >= 2 && rsi1H !== null) {
+                        
+                        const currentEma9_1h = ema9_1h_arr[ema9_1h_arr.length - 1];
+                        const currentEma33_1h = ema33_1h_arr[ema33_1h_arr.length - 1];
 
- if(filtered.length===0) {
-  body.innerHTML =
-   '<tr><td colspan="5">No matching coins found yet.</td></tr>';
-  return;
- }
+                        const prevEma9_1h = ema9_1h_arr[ema9_1h_arr.length - 2];
+                        const prevEma33_1h = ema33_1h_arr[ema33_1h_arr.length - 2];
 
- body.innerHTML = filtered.map((c,i)=>{
-  let label,cls;
+                        // 1. UP TREND (EMA 9 crosses EMA 33 from bottom to top on 1H)
+                        const isUpTrendBullishCross = (prevEma9_1h <= prevEma33_1h) && (currentEma9_1h > currentEma33_1h);
 
-  if(activeTab==="up") {
-   label="Uptrend"; cls="up";
-  } else if(activeTab==="range") {
-   label="Ranging"; cls="range";
-  } else {
-   label="Downtrend"; cls="down";
-  }
+                        // 2. DOWN TREND (ONLY 1H RSI strictly between 20 and 30)
+                        const isDownTrendMatched = rsi1H >= 20 && rsi1H <= 30;
 
-  const price = c.price < 1
-   ? c.price.toPrecision(6)
-   : c.price.toLocaleString("en-US",
-      {maximumFractionDigits:6});
+                        // 3. RANGING MARKET
+                        const emaDiffPercent = Math.abs((currentEma9_1h - currentEma33_1h) / currentEma33_1h) * 100;
+                        const isRanging = emaDiffPercent < 0.35 && !isUpTrendBullishCross;
 
-  return `<tr>
-   <td>${i+1}</td>
-   <td>${c.symbol}</td>
-   <td>${price}</td>
-   <td class="${c.change>=0?'up':'down'}">
-    ${c.change.toFixed(2)}%
-   </td>
-   <td class="${cls}">${label}</td>
-  </tr>`;
- }).join("");
-}
-</script>
+                        const coinInfo = {
+                            symbol,
+                            baseAsset: symbol.replace('USDT', ''),
+                            price,
+                            change,
+                            volume,
+                            rsi1H,
+                            ema9_1h: currentEma9_1h,
+                            ema33_1h: currentEma33_1h
+                        };
+
+                        if (isUpTrendBullishCross) {
+                            scannedData.uptrend.push(coinInfo);
+                        } else if (isRanging) {
+                            scannedData.ranging.push(coinInfo);
+                        } else if (isDownTrendMatched) {
+                            scannedData.downtrend.push(coinInfo);
+                        }
+                    }
+
+                    completed++;
+                    const progress = Math.round((completed / topPairs.length) * 100);
+                    document.getElementById('progress-bar').style.width = `${progress}%`;
+                    document.getElementById('scan-progress-text').innerText = `${progress}%`;
+                    document.getElementById('scan-count').innerText = `${completed} / ${topPairs.length} Coins`;
+                    
+                    updateBadges();
+                    renderCoins();
+                }
+
+            } catch (err) {
+                console.error('Scanning error:', err);
+            } finally {
+                isScanning = false;
+                refreshIcon.classList.remove('animate-spin');
+                setTimeout(() => {
+                    document.getElementById('progress-container').classList.add('hidden');
+                }, 1000);
+            }
+        }
+
+        function updateBadges() {
+            document.getElementById('badge-uptrend').innerText = scannedData.uptrend.length;
+            document.getElementById('badge-ranging').innerText = scannedData.ranging.length;
+            document.getElementById('badge-downtrend').innerText = scannedData.downtrend.length;
+        }
+
+        function renderCoins() {
+            const container = document.getElementById('coins-container');
+            const emptyState = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('search-input').value.toUpperCase().trim();
+            const sortBy = document.getElementById('sort-select').value;
+
+            let list = [...scannedData[currentTab]];
+
+            if (searchQuery) {
+                list = list.filter(c => c.symbol.includes(searchQuery) || c.baseAsset.includes(searchQuery));
+            }
+
+            if (sortBy === 'gainers') {
+                list.sort((a, b) => b.change - a.change);
+            } else if (sortBy === 'volume') {
+                list.sort((a, b) => b.volume - a.volume);
+            } else if (sortBy === 'symbol') {
+                list.sort((a, b) => a.symbol.localeCompare(b.symbol));
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = list.map(coin => {
+                const isPositive = coin.change >= 0;
+                const volumeFormatted = (coin.volume / 1000000).toFixed(2) + 'M';
+                
+                let badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                let glowClass = 'hover:border-emerald-500/40';
+                let statusLabel = 'EMA 9/33 CROSS';
+
+                if (currentTab === 'ranging') {
+                    badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    glowClass = 'hover:border-amber-500/40';
+                    statusLabel = 'SIDEWAYS / RANGE';
+                } else if (currentTab === 'downtrend') {
+                    badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+                    glowClass = 'hover:border-rose-500/40';
+                    statusLabel = `RSI ${coin.rsi1H.toFixed(1)} (OVERSOLD)`;
+                }
+
+                return `
+                    <div class="bg-gray-900/80 border border-gray-800/90 hover:bg-gray-900 rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between ${glowClass} group">
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center font-bold text-xs text-amber-400 border border-gray-700">
+                                        ${coin.baseAsset.substring(0, 3)}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-base text-gray-100 group-hover:text-amber-400 transition">${coin.symbol}</h4>
+                                        <span class="text-[10px] text-gray-500 font-medium">Spot USDT</span>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] px-2.5 py-1 rounded-full border font-bold ${badgeClass}">
+                                    ${statusLabel}
+                                </span>
+                            </div>
+
+                            <div class="flex items-baseline justify-between my-3">
+                                <div>
+                                    <div class="text-xl font-extrabold font-mono text-white">$${coin.price < 1 ? coin.price.toFixed(4) : coin.price.toLocaleString()}</div>
+                                    <div class="text-xs text-gray-400 mt-0.5">Vol: $${volumeFormatted}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center gap-1 font-bold text-sm px-2 py-0.5 rounded-md ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                                        ${isPositive ? '+' : ''}${coin.change.toFixed(2)}%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 my-4 bg-gray-950/60 p-2.5 rounded-xl border border-gray-800/60 text-xs font-mono">
+                                <div>
+                                    <span class="text-[10px] text-gray-500 block">1H RSI (14)</span>
+                                    <span class="${coin.rsi1H <= 30 ? 'text-amber-400' : 'text-gray-300'} font-bold">
+                                        ${coin.rsi1H.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-500 block">Condition</span>
+                                    <span class="text-rose-400 font-semibold">
+                                        RSI 20 - 30
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2 border-t border-gray-800/60">
+                            <button onclick="openTradingViewModal('${coin.symbol}')" class="flex-1 py-2 px-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-200 transition flex items-center justify-center gap-1.5 border border-gray-700/80">
+                                <i data-lucide="candlestick-chart" class="w-3.5 h-3.5 text-amber-400"></i>
+                                Chart
+                            </button>
+                            <a href="https://www.binance.com/en/trade/${coin.symbol}?type=spot" target="_blank" class="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-black transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                Trade Spot
+                            </a>
+                        </div>
+
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function filterCoins() {
+            renderCoins();
+        }
+
+        function openTradingViewModal(symbol) {
+            document.getElementById('modal-coin-title').innerText = `${symbol} (Binance Spot)`;
+            document.getElementById('modal-coin-trend').innerText = currentTab.toUpperCase();
+            document.getElementById('chart-modal').classList.remove('hidden');
+
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": `BINANCE:${symbol}`,
+                "interval": "60",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tv-chart-container"
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('chart-modal').classList.add('hidden');
+            document.getElementById('tv-chart-container').innerHTML = '';
+        }
+    </script>
 </body>
 </html>
-  
