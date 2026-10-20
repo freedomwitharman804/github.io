@@ -1,71 +1,239 @@
-async function scanAllMarketBy24hChange() {
-  try {
-    console.log("🔄 Fetching 24hr ticker data for all Binance spot coins...");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freedom with Arman | Binance Market Scanner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background-color: #1e293b;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #f3f4f6;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+    .btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-bottom: 25px;
+    }
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      background-color: #334155;
+    }
     
-    // Binance ki 24hr ticker API se saare coins ka data aik sath aa jata hai
-    const res = await fetch('https://data-api.binance.vision/api/v3/ticker/24hr');
-    const tickers = await res.json();
-
-    // Sirf USDT spot trading pairs filter karna (Leverage tokens skip karke)
-    const usdtTickers = tickers.filter(t => 
-      t.symbol.endsWith('USDT') && 
-      !t.symbol.includes('UP') && 
-      !t.symbol.includes('DOWN')
-    );
-
-    let uptrendCount = 0;
-    let downtrendCount = 0;
-    let sidewaysCount = 0;
-    let totalChecked = usdtTickers.length;
-
-    usdtTickers.forEach(t => {
-      const changePercent = parseFloat(t.priceChangePercent);
-
-      // Simple Logic: 
-      // Agar 24h change +1.5% se zyada hai -> Uptrend
-      // Agar 24h change -1.5% se kam hai -> Downtrend
-      // Agar beech mein hai -> Sideways
-      if (changePercent > 1.5) {
-        uptrendCount++;
-      } else if (changePercent < -1.5) {
-        downtrendCount++;
-      } else {
-        sidewaysCount++;
-      }
-    });
-
-    // Percentages calculate karna
-    const upPercent = ((uptrendCount / totalChecked) * 100).toFixed(1);
-    const downPercent = ((downtrendCount / totalChecked) * 100).toFixed(1);
-    const sidewaysPercent = ((sidewaysCount / totalChecked) * 100).toFixed(1);
-
-    // Overall Market Decision
-    let marketSentiment = "";
-    if (upPercent >= 60) {
-      marketSentiment = "🚀 STRONG BULLISH MARKET (Uptrend Dominant!)";
-    } else if (downPercent >= 60) {
-      marketSentiment = "🩸 STRONG BEARISH MARKET (Downtrend Dominant!)";
-    } else {
-      marketSentiment = "⚖️ SIDEWAYS / MIXED MARKET (Ranging Condition)";
+    /* Progress Bar Layout */
+    .progress-container {
+      display: flex;
+      height: 28px;
+      border-radius: 14px;
+      overflow: hidden;
+      background-color: #334155;
+      margin-bottom: 25px;
+    }
+    .bar-up {
+      background-color: #22c55e;
+      transition: width 0.5s ease;
+    }
+    .bar-sideways {
+      background-color: #eab308;
+      transition: width 0.5s ease;
+    }
+    .bar-down {
+      background-color: #ef4444;
+      transition: width 0.5s ease;
     }
 
-    // Print Complete Summary
-    console.log("\n==================================================");
-    console.log("    🌐 BINANCE 24H MARKET BREADTH REPORT    ");
-    console.log("==================================================");
-    console.log(`📊 Total Coins Scanned : ${totalChecked}`);
-    console.log("--------------------------------------------------");
-    console.log(`🟢 Uptrend Coins      : ${upPercent}% (${uptrendCount} coins)`);
-    console.log(`🔴 Downtrend Coins    : ${downPercent}% (${downtrendCount} coins)`);
-    console.log(`🟡 Sideways Coins     : ${sidewaysPercent}% (${sidewaysCount} coins)`);
-    console.log("==================================================");
-    console.log(`🎯 MARKET STATUS      : ${marketSentiment}`);
-    console.log("==================================================\n");
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+    .stat-box {
+      background-color: #0f172a;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .stat-box h3 {
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+    .stat-box .number {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .text-up { color: #22c55e; }
+    .text-sideways { color: #eab308; }
+    .text-down { color: #ef4444; }
+    
+    .footer {
+      margin-top: 25px;
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
 
-  } catch (err) {
-    console.error("❌ Error fetching data:", err.message);
-  }
-}
+  <div class="card">
+    <div class="brand-title">Freedom with Arman</div>
+    <h1>🌐 Binance Live Market Scanner</h1>
+    <p class="subtitle" id="totalCoins">Total Spot Coins: Loading...</p>
 
-// Run Scanner
-scanAllMarketBy24hChange();
+    <button class="btn" onclick="scanMarket()">🔄 Scan Market Now</button>
+
+    <div id="statusBadge" class="status-badge">⏳ Ready to Scan</div>
+
+    <!-- Multi-Color Progress Bar -->
+    <div class="progress-container">
+      <div id="barUp" class="bar-up" style="width: 33.3%;"></div>
+      <div id="barSideways" class="bar-sideways" style="width: 33.3%;"></div>
+      <div id="barDown" class="bar-down" style="width: 33.3%;"></div>
+    </div>
+
+    <!-- Detailed Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <h3 class="text-up">🟢 Uptrend</h3>
+        <div id="valUp" class="number text-up">0%</div>
+        <small id="countUp" style="color:#94a3b8">(0 coins)</small>
+      </div>
+      <div class="stat-box">
+        <h3 class="text-sideways">🟡 Sideways</h3>
+        <div id="valSideways" class="number text-sideways">0%</div>
+        <small id="countSideways" style="color:#94a3b8">(0 coins)</small>
+      </div>
+      <div class="stat-box">
+        <h3 class="text-down">🔴 Downtrend</h3>
+        <div id="valDown" class="number text-down">0%</div>
+        <small id="countDown" style="color:#94a3b8">(0 coins)</small>
+      </div>
+    </div>
+
+    <div class="footer">Powered by Binance Public API</div>
+  </div>
+
+  <script>
+    async function scanMarket() {
+      const badge = document.getElementById('statusBadge');
+      badge.innerHTML = "⏳ Scanning Binance Market...";
+      badge.style.color = "#94a3b8";
+
+      try {
+        const res = await fetch('https://data-api.binance.vision/api/v3/ticker/24hr');
+        const tickers = await res.json();
+
+        // USDT Spot pairs skip UP/DOWN leverage
+        const usdtTickers = tickers.filter(t => 
+          t.symbol.endsWith('USDT') && 
+          !t.symbol.includes('UP') && 
+          !t.symbol.includes('DOWN')
+        );
+
+        let uptrend = 0;
+        let downtrend = 0;
+        let sideways = 0;
+        let total = usdtTickers.length;
+
+        usdtTickers.forEach(t => {
+          const change = parseFloat(t.priceChangePercent);
+          if (change > 1.5) uptrend++;
+          else if (change < -1.5) downtrend++;
+          else sideways++;
+        });
+
+        const upPct = ((uptrend / total) * 100).toFixed(1);
+        const sidePct = ((sideways / total) * 100).toFixed(1);
+        const downPct = ((downtrend / total) * 100).toFixed(1);
+
+        // Update UI Text & Numbers
+        document.getElementById('totalCoins').innerText = `Total USDT Spot Pairs: ${total}`;
+        document.getElementById('valUp').innerText = `${upPct}%`;
+        document.getElementById('countUp').innerText = `(${uptrend} coins)`;
+
+        document.getElementById('valSideways').innerText = `${sidePct}%`;
+        document.getElementById('countSideways').innerText = `(${sideways} coins)`;
+
+        document.getElementById('valDown').innerText = `${downPct}%`;
+        document.getElementById('countDown').innerText = `(${downtrend} coins)`;
+
+        // Update Visual Progress Bar
+        document.getElementById('barUp').style.width = `${upPct}%`;
+        document.getElementById('barSideways').style.width = `${sidePct}%`;
+        document.getElementById('barDown').style.width = `${downPct}%`;
+
+        // Update Overall Market Status
+        if (upPct >= 60) {
+          badge.innerHTML = "🚀 STRONG BULLISH MARKET";
+          badge.style.color = "#22c55e";
+        } else if (downPct >= 60) {
+          badge.innerHTML = "🩸 STRONG BEARISH MARKET";
+          badge.style.color = "#ef4444";
+        } else {
+          badge.innerHTML = "⚖️ SIDEWAYS / RANGING MARKET";
+          badge.style.color = "#eab308";
+        }
+
+      } catch (err) {
+        badge.innerHTML = "❌ Failed to fetch market data";
+        badge.style.color = "#ef4444";
+      }
+    }
+
+    // Auto scan on load
+    scanMarket();
+  </script>
+</body>
+</html>
