@@ -1,126 +1,71 @@
-// Function to calculate Simple Moving Average
-function calculateSMA(data, period) {
-  if (data.length < period) return null;
-  const slice = data.slice(data.length - period);
-  const sum = slice.reduce((acc, val) => acc + val, 0);
-  return sum / period;
-}
-
-// 1. Binance ke SARA Spot USDT pairs fetch karne ka function
-async function getAllSpotUSDTPairs() {
+async function scanAllMarketBy24hChange() {
   try {
-    console.log("🔄 Fetching all Binance Spot pairs list...");
-    const res = await fetch('https://data-api.binance.vision/api/v3/exchangeInfo');
-    const data = await res.json();
-
-    // Sirf TRADING status wale USDT spot coins pass karenge (UP/DOWN leverage tokens skip karke)
-    const usdtPairs = data.symbols
-      .filter(s => s.quoteAsset === 'USDT' && 
-                   s.status === 'TRADING' && 
-                   s.isSpotTradingAllowed &&
-                   !s.symbol.includes('UP') && 
-                   !s.symbol.includes('DOWN'))
-      .map(s => s.symbol);
-
-    console.log(`✅ Total Spot Coins Found: ${usdtPairs.length}\n`);
-    return usdtPairs;
-  } catch (err) {
-    console.error("❌ Failed to fetch symbols list:", err.message);
-    return [];
-  }
-}
-
-// 2. Single coin trend checker
-async function checkCoinTrend(symbol) {
-  try {
-    const url = `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=1h&limit=60`;
-    const response = await fetch(url);
-    if (!response.ok) return null;
-
-    const klines = await response.json();
-    const closePrices = klines.map(candle => parseFloat(candle[4]));
-
-    const currentPrice = closePrices[closePrices.length - 1];
-    const sma20 = calculateSMA(closePrices, 20);
-    const sma50 = calculateSMA(closePrices, 50);
-
-    if (!sma20 || !sma50) return null;
-
-    if (currentPrice > sma20 && sma20 > sma50) return "UP";
-    if (currentPrice < sma20 && sma20 < sma50) return "DOWN";
-    return "SIDEWAYS";
-  } catch (error) {
-    return null;
-  }
-}
-
-// Helper to pause execution
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// 3. Main Master Scanner
-async function scanAllBinanceSpotMarket() {
-  const allSymbols = await getAllSpotUSDTPairs();
-  if (allSymbols.length === 0) return;
-
-  let uptrendCount = 0;
-  let downtrendCount = 0;
-  let sidewaysCount = 0;
-  let totalChecked = 0;
-
-  console.log("🚀 Scanning entire Binance Spot Market... This may take ~20-30 seconds.\n");
-
-  // Batching (10 coins per iteration to keep speed high & avoid rate limit)
-  const BATCH_SIZE = 10;
-  for (let i = 0; i < allSymbols.length; i += BATCH_SIZE) {
-    const batch = allSymbols.slice(i, i + BATCH_SIZE);
+    console.log("🔄 Fetching 24hr ticker data for all Binance spot coins...");
     
-    // Parallel scanning for current batch
-    const results = await Promise.all(batch.map(sym => checkCoinTrend(sym)));
+    // Binance ki 24hr ticker API se saare coins ka data aik sath aa jata hai
+    const res = await fetch('https://data-api.binance.vision/api/v3/ticker/24hr');
+    const tickers = await res.json();
 
-    results.forEach(trend => {
-      if (trend) {
-        totalChecked++;
-        if (trend === "UP") uptrendCount++;
-        else if (trend === "DOWN") downtrendCount++;
-        else if (trend === "SIDEWAYS") sidewaysCount++;
+    // Sirf USDT spot trading pairs filter karna (Leverage tokens skip karke)
+    const usdtTickers = tickers.filter(t => 
+      t.symbol.endsWith('USDT') && 
+      !t.symbol.includes('UP') && 
+      !t.symbol.includes('DOWN')
+    );
+
+    let uptrendCount = 0;
+    let downtrendCount = 0;
+    let sidewaysCount = 0;
+    let totalChecked = usdtTickers.length;
+
+    usdtTickers.forEach(t => {
+      const changePercent = parseFloat(t.priceChangePercent);
+
+      // Simple Logic: 
+      // Agar 24h change +1.5% se zyada hai -> Uptrend
+      // Agar 24h change -1.5% se kam hai -> Downtrend
+      // Agar beech mein hai -> Sideways
+      if (changePercent > 1.5) {
+        uptrendCount++;
+      } else if (changePercent < -1.5) {
+        downtrendCount++;
+      } else {
+        sidewaysCount++;
       }
     });
 
-    // Progress bar update
-    process.stdout.write(`⏳ Scanned ${Math.min(i + BATCH_SIZE, allSymbols.length)} / ${allSymbols.length} coins...\r`);
-    
-    // Short pause between batches
-    await sleep(150);
+    // Percentages calculate karna
+    const upPercent = ((uptrendCount / totalChecked) * 100).toFixed(1);
+    const downPercent = ((downtrendCount / totalChecked) * 100).toFixed(1);
+    const sidewaysPercent = ((sidewaysCount / totalChecked) * 100).toFixed(1);
+
+    // Overall Market Decision
+    let marketSentiment = "";
+    if (upPercent >= 60) {
+      marketSentiment = "🚀 STRONG BULLISH MARKET (Uptrend Dominant!)";
+    } else if (downPercent >= 60) {
+      marketSentiment = "🩸 STRONG BEARISH MARKET (Downtrend Dominant!)";
+    } else {
+      marketSentiment = "⚖️ SIDEWAYS / MIXED MARKET (Ranging Condition)";
+    }
+
+    // Print Complete Summary
+    console.log("\n==================================================");
+    console.log("    🌐 BINANCE 24H MARKET BREADTH REPORT    ");
+    console.log("==================================================");
+    console.log(`📊 Total Coins Scanned : ${totalChecked}`);
+    console.log("--------------------------------------------------");
+    console.log(`🟢 Uptrend Coins      : ${upPercent}% (${uptrendCount} coins)`);
+    console.log(`🔴 Downtrend Coins    : ${downPercent}% (${downtrendCount} coins)`);
+    console.log(`🟡 Sideways Coins     : ${sidewaysPercent}% (${sidewaysCount} coins)`);
+    console.log("==================================================");
+    console.log(`🎯 MARKET STATUS      : ${marketSentiment}`);
+    console.log("==================================================\n");
+
+  } catch (err) {
+    console.error("❌ Error fetching data:", err.message);
   }
-
-  // Calculate Percentages
-  const upPercent = ((uptrendCount / totalChecked) * 100).toFixed(1);
-  const downPercent = ((downtrendCount / totalChecked) * 100).toFixed(1);
-  const sidewaysPercent = ((sidewaysCount / totalChecked) * 100).toFixed(1);
-
-  // Decision logic
-  let marketSentiment = "";
-  if (upPercent >= 60) {
-    marketSentiment = "🚀 STRONG BULLISH MARKET (Uptrend Dominant!)";
-  } else if (downPercent >= 60) {
-    marketSentiment = "🩸 STRONG BEARISH MARKET (Downtrend Dominant!)";
-  } else {
-    marketSentiment = "⚖️ SIDEWAYS / MIXED MARKET (Ranging Condition)";
-  }
-
-  // Print Complete Summary
-  console.log("\n\n==================================================");
-  console.log("    🌐 BINANCE ALL SPOT MARKET BREADTH REPORT    ");
-  console.log("==================================================");
-  console.log(`📊 Total Coins Scanned : ${totalChecked}`);
-  console.log("--------------------------------------------------");
-  console.log(`🟢 Uptrend Coins      : ${upPercent}% (${uptrendCount} coins)`);
-  console.log(`🔴 Downtrend Coins    : ${downPercent}% (${downtrendCount} coins)`);
-  console.log(`🟡 Sideways Coins     : ${sidewaysPercent}% (${sidewaysCount} coins)`);
-  console.log("==================================================");
-  console.log(`🎯 MARKET STATUS      : ${marketSentiment}`);
-  console.log("==================================================\n");
 }
 
 // Run Scanner
-scanAllBinanceSpotMarket();
+scanAllMarketBy24hChange();
