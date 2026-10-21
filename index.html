@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freedom with Arman - Spot Crypto Scanner</title>
+    <title>Freedom with Arman - All Spot Crypto Scanner</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for Page 4 -->
@@ -56,7 +56,7 @@
                         </h1>
                         <p class="text-xs text-gray-400 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                            Binance Spot Market Scanner
+                            Binance All Spot Coins Scanner
                         </p>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
                 <div class="flex items-center gap-3">
                     <button id="scan-btn" onclick="startScan()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-gray-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
                         <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                        <span>Start Scan</span>
+                        <span>Start Full Scan</span>
                     </button>
                 </div>
             </div>
@@ -115,7 +115,7 @@
             <!-- Progress Bar -->
             <div id="progress-container" class="mt-6 hidden">
                 <div class="flex justify-between text-xs text-gray-400 mb-2">
-                    <span id="progress-status">Fetching USDT Spot Pairs...</span>
+                    <span id="progress-status">Fetching all USDT Spot Pairs...</span>
                     <span id="progress-percentage" class="font-mono text-emerald-400">0%</span>
                 </div>
                 <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
@@ -163,7 +163,7 @@
                             <td colspan="7" class="py-16 text-center text-gray-500">
                                 <i data-lucide="scan" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
                                 <p class="text-base font-medium">No active scan results yet.</p>
-                                <p class="text-xs text-gray-600 mt-1">Click the "Start Scan" button above to fetch live Binance Spot data.</p>
+                                <p class="text-xs text-gray-600 mt-1">Click "Start Full Scan" to scan all Binance Spot coins.</p>
                             </td>
                         </tr>
                     </tbody>
@@ -247,33 +247,27 @@
 
     <!-- JavaScript Application Logic -->
     <script>
-        // Global State variables
         let currentTab = 'page1';
         let isScanning = false;
         let scannedData = [];
         let filteredData = [];
         let regimeChartInstance = null;
 
-        // On Page Load Initialization
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
             initChart();
         });
 
-        // Tab Switching Logic
         function switchTab(tabId) {
             currentTab = tabId;
 
-            // Highlight buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-white'));
             
-            // Set desktop & mobile button active states
             const activeDesktop = document.getElementById(`btn-${tabId}`);
             const activeMobile = document.getElementById(`m-btn-${tabId}`);
             if (activeDesktop) activeDesktop.classList.add('active');
             if (activeMobile) activeMobile.classList.add('active');
 
-            // Titles & Descriptions
             const titleEl = document.getElementById('page-title');
             const descEl = document.getElementById('page-desc');
             const controlsEl = document.getElementById('table-controls');
@@ -306,11 +300,9 @@
                 regimeView.style.display = "block";
             }
 
-            // Render table content for active tab
             renderCurrentView();
         }
 
-        // Calculation Helpers for Technical Analysis
         function calculateRSI(prices, period = 14) {
             if (prices.length < period + 1) return 50;
             let gains = 0, losses = 0;
@@ -346,7 +338,69 @@
             return sum / period;
         }
 
-        // Main Scanning Function
+        // Batch helper to avoid browser rate-limits during full scan
+        async function fetchWithBatch(pairs, batchSize = 10, delayMs = 100) {
+            const results = [];
+            for (let i = 0; i < pairs.length; i += batchSize) {
+                const batch = pairs.slice(i, i + batchSize);
+                const batchPromises = batch.map(async (item) => {
+                    const symbol = item.symbol;
+                    try {
+                        const [res1h, res1d] = await Promise.all([
+                            fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=50`),
+                            fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=30`)
+                        ]);
+
+                        if (!res1h.ok || !res1d.ok) return null;
+
+                        const klines1h = await res1h.json();
+                        const klines1d = await res1d.json();
+
+                        const closes1h = klines1h.map(k => parseFloat(k[4]));
+                        const closes1d = klines1d.map(k => parseFloat(k[4]));
+
+                        const currentPrice = closes1h[closes1h.length - 1];
+                        const rsi1h = calculateRSI(closes1h, 14);
+                        const sma20_1h = calculateSMA(closes1h, 20);
+                        const sma50_1h = calculateSMA(closes1h, 50);
+                        const sma20_1d = calculateSMA(closes1d, 20);
+
+                        const is1DUptrend = currentPrice > sma20_1d;
+                        const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h && rsi1h > 52;
+                        const is1HDowntrend = currentPrice < sma20_1h && rsi1h < 45;
+                        const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.015 && rsi1h >= 45 && rsi1h <= 55;
+
+                        return {
+                            symbol: symbol.replace('USDT', ''),
+                            fullSymbol: symbol,
+                            price: currentPrice,
+                            change: parseFloat(item.priceChangePercent),
+                            volume: parseFloat(item.quoteVolume),
+                            rsi1h: rsi1h,
+                            isDualUptrend: is1DUptrend && is1HUptrend,
+                            isRanging: is1HRanging,
+                            isDowntrend: is1HDowntrend
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                });
+
+                const batchResults = await Promise.all(batchPromises);
+                results.push(...batchResults.filter(r => r !== null));
+
+                // Progress Update
+                const processedCount = Math.min(i + batchSize, pairs.length);
+                const percent = Math.round((processedCount / pairs.length) * 100);
+                document.getElementById('progress-bar').style.width = `${percent}%`;
+                document.getElementById('progress-percentage').textContent = `${percent}%`;
+                document.getElementById('progress-status').textContent = `Scanning Spot Pairs (${processedCount}/${pairs.length})...`;
+
+                if (delayMs > 0) await new Promise(r => setTimeout(r, delayMs));
+            }
+            return results;
+        }
+
         async function startScan() {
             if (isScanning) return;
             isScanning = true;
@@ -357,89 +411,37 @@
             const progressStatus = document.getElementById('progress-status');
             const progressPercentage = document.getElementById('progress-percentage');
 
-            // UI Progress Reset
             scanBtn.disabled = true;
             scanBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            scanBtn.querySelector('span').textContent = "Scanning...";
+            scanBtn.querySelector('span').textContent = "Scanning All Coins...";
             progressContainer.classList.remove('hidden');
             progressBar.style.width = '0%';
             progressPercentage.textContent = '0%';
-            progressStatus.textContent = "Fetching Binance Spot pairs...";
+            progressStatus.textContent = "Fetching all active Binance Spot pairs...";
 
             try {
-                // Step 1: Fetch 24h Ticker data from Binance Spot
                 const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
                 const tickerData = await tickerRes.json();
 
-                // Filter top liquid USDT spot trading pairs (Excluding Futures, DOWN, UP, BEAR, BULL tokens)
-                let usdtPairs = tickerData.filter(item => 
+                // Get ALL Spot USDT Trading Pairs (Excluding UP/DOWN leverage tokens)
+                let allUsdtSpotPairs = tickerData.filter(item => 
                     item.symbol.endsWith('USDT') && 
                     !item.symbol.includes('UP') && 
                     !item.symbol.includes('DOWN') &&
                     !item.symbol.includes('BULL') &&
                     !item.symbol.includes('BEAR') &&
-                    parseFloat(item.quoteVolume) > 3000000 // Top volume pairs (> 3M USDT volume)
+                    parseFloat(item.quoteVolume) > 50000 // Active coins with minimum volume
                 );
 
-                // Sort by highest volume and cap to top 50 pairs for fast live scanning
-                usdtPairs.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
-                usdtPairs = usdtPairs.slice(0, 50);
+                // Sort by Volume
+                allUsdtSpotPairs.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
 
-                scannedData = [];
-                const total = usdtPairs.length;
+                progressStatus.textContent = `Found ${allUsdtSpotPairs.length} Spot Coins. Starting analysis...`;
 
-                // Step 2: Fetch Candles and process Technical Signals for each pair
-                for (let i = 0; i < total; i++) {
-                    const item = usdtPairs[i];
-                    const symbol = item.symbol;
-                    
-                    progressStatus.textContent = `Analyzing (${i + 1}/${total}): ${symbol}`;
-                    const percent = Math.round(((i + 1) / total) * 100);
-                    progressBar.style.width = `${percent}%`;
-                    progressPercentage.textContent = `${percent}%`;
+                // Perform batch scan
+                scannedData = await fetchWithBatch(allUsdtSpotPairs, 8, 80);
 
-                    try {
-                        // Fetch 1H candles
-                        const klines1hRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=50`);
-                        const klines1h = await klines1hRes.json();
-
-                        // Fetch 1D candles
-                        const klines1dRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=30`);
-                        const klines1d = await klines1dRes.json();
-
-                        const closes1h = klines1h.map(k => parseFloat(k[4]));
-                        const closes1d = klines1d.map(k => parseFloat(k[4]));
-
-                        const currentPrice = closes1h[closes1h.length - 1];
-                        const rsi1h = calculateRSI(closes1h, 14);
-                        const sma20_1h = calculateSMA(closes1h, 20);
-                        const sma50_1h = calculateSMA(closes1h, 50);
-
-                        const sma20_1d = calculateSMA(closes1d, 20);
-
-                        // Signal Classifications
-                        const is1DUptrend = currentPrice > sma20_1d;
-                        const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h && rsi1h > 52;
-                        const is1HDowntrend = currentPrice < sma20_1h && rsi1h < 45;
-                        const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.012 && rsi1h >= 45 && rsi1h <= 55;
-
-                        scannedData.push({
-                            symbol: symbol.replace('USDT', ''),
-                            fullSymbol: symbol,
-                            price: currentPrice,
-                            change: parseFloat(item.priceChangePercent),
-                            volume: parseFloat(item.quoteVolume),
-                            rsi1h: rsi1h,
-                            isDualUptrend: is1DUptrend && is1HUptrend,
-                            isRanging: is1HRanging,
-                            isDowntrend: is1HDowntrend
-                        });
-                    } catch (err) {
-                        console.error(`Error processing ${symbol}`, err);
-                    }
-                }
-
-                progressStatus.textContent = "Scan Completed Successfully!";
+                progressStatus.textContent = `Scan Complete! Scanned ${scannedData.length} active Binance spot coins.`;
             } catch (error) {
                 console.error("Scan failed:", error);
                 alert("Failed to scan market data. Please check your internet connection.");
@@ -447,14 +449,13 @@
                 isScanning = false;
                 scanBtn.disabled = false;
                 scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                scanBtn.querySelector('span').textContent = "Re-Scan Market";
+                scanBtn.querySelector('span').textContent = "Re-Scan All Spot Coins";
 
                 renderCurrentView();
                 updateRegimePage();
             }
         }
 
-        // Render Table Rows based on current Tab & Filters
         function renderCurrentView() {
             if (currentTab === 'page4') return;
 
@@ -469,13 +470,11 @@
                 dataToDisplay = scannedData.filter(d => d.isDowntrend);
             }
 
-            // Apply Search Term
             const searchTerm = document.getElementById('search-input').value.toUpperCase();
             if (searchTerm) {
                 dataToDisplay = dataToDisplay.filter(d => d.symbol.includes(searchTerm));
             }
 
-            // Apply Sort
             const sortVal = document.getElementById('sort-select').value;
             if (sortVal === 'volume') {
                 dataToDisplay.sort((a, b) => b.volume - a.volume);
@@ -543,17 +542,14 @@
             lucide.createIcons();
         }
 
-        // Live Search Filter Handler
         function filterResults() {
             renderCurrentView();
         }
 
-        // Sorting Handler
         function sortResults() {
             renderCurrentView();
         }
 
-        // Update Page 4 (Market Regime Summary)
         function updateRegimePage() {
             const uptrendCount = scannedData.filter(d => d.isDualUptrend).length;
             const rangingCount = scannedData.filter(d => d.isRanging).length;
@@ -582,7 +578,6 @@
                 }
             }
 
-            // Update Doughnut Chart
             if (regimeChartInstance) {
                 regimeChartInstance.data.datasets[0].data = [uptrendCount, rangingCount, downtrendCount];
                 regimeChartInstance.update();
@@ -591,7 +586,6 @@
             lucide.createIcons();
         }
 
-        // Initialize Chart.js Doughnut Chart
         function initChart() {
             const ctx = document.getElementById('regimeChart').getContext('2d');
             regimeChartInstance = new Chart(ctx, {
