@@ -1,239 +1,622 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Freedom with Arman | Binance Market Scanner</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .card {
-      background-color: #1e293b;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-    .brand-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 5px;
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
-      color: #f3f4f6;
-    }
-    .subtitle {
-      color: #94a3b8;
-      font-size: 14px;
-      margin-bottom: 25px;
-    }
-    .btn {
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-bottom: 25px;
-    }
-    .btn:hover {
-      background-color: #1d4ed8;
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 25px;
-      background-color: #334155;
-    }
-    
-    /* Progress Bar Layout */
-    .progress-container {
-      display: flex;
-      height: 28px;
-      border-radius: 14px;
-      overflow: hidden;
-      background-color: #334155;
-      margin-bottom: 25px;
-    }
-    .bar-up {
-      background-color: #22c55e;
-      transition: width 0.5s ease;
-    }
-    .bar-sideways {
-      background-color: #eab308;
-      transition: width 0.5s ease;
-    }
-    .bar-down {
-      background-color: #ef4444;
-      transition: width 0.5s ease;
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-    .stat-box {
-      background-color: #0f172a;
-      padding: 15px;
-      border-radius: 10px;
-    }
-    .stat-box h3 {
-      font-size: 13px;
-      margin-bottom: 5px;
-    }
-    .stat-box .number {
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .text-up { color: #22c55e; }
-    .text-sideways { color: #eab308; }
-    .text-down { color: #ef4444; }
-    
-    .footer {
-      margin-top: 25px;
-      font-size: 12px;
-      color: #64748b;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom with Arman - Spot Crypto Scanner</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for Page 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0e14;
+            color: #f3f4f6;
+        }
+        .tab-btn.active {
+            background-color: #10b981;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between">
 
-  <div class="card">
-    <div class="brand-title">Freedom with Arman</div>
-    <h1>🌐 Binance Live Market Scanner</h1>
-    <p class="subtitle" id="totalCoins">Total Spot Coins: Loading...</p>
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-emerald-500 to-teal-300 p-2 rounded-lg text-gray-950 font-bold">
+                        <i data-lucide="line-chart" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+                            Freedom with Arman
+                        </h1>
+                        <p class="text-xs text-gray-400 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                            Binance Spot Market Scanner
+                        </p>
+                    </div>
+                </div>
 
-    <button class="btn" onclick="scanMarket()">🔄 Scan Market Now</button>
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-2 bg-gray-950/60 p-1.5 rounded-xl border border-gray-800">
+                    <button onclick="switchTab('page1')" id="btn-page1" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> 1D & 1H Uptrend
+                    </button>
+                    <button onclick="switchTab('page2')" id="btn-page2" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
+                        <i data-lucide="arrow-right-left" class="w-4 h-4"></i> 1H Ranging
+                    </button>
+                    <button onclick="switchTab('page3')" id="btn-page3" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
+                        <i data-lucide="trending-down" class="w-4 h-4"></i> 1H Downtrend
+                    </button>
+                    <button onclick="switchTab('page4')" id="btn-page4" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-4 h-4"></i> Market Regime
+                    </button>
+                </nav>
+            </div>
 
-    <div id="statusBadge" class="status-badge">⏳ Ready to Scan</div>
+            <!-- Mobile Navigation -->
+            <div class="flex md:hidden space-x-1 pb-3 overflow-x-auto text-xs">
+                <button onclick="switchTab('page1')" id="m-btn-page1" class="tab-btn active px-3 py-1.5 rounded-lg font-medium whitespace-nowrap">1D & 1H Uptrend</button>
+                <button onclick="switchTab('page2')" id="m-btn-page2" class="tab-btn px-3 py-1.5 rounded-lg font-medium whitespace-nowrap text-gray-400">1H Ranging</button>
+                <button onclick="switchTab('page3')" id="m-btn-page3" class="tab-btn px-3 py-1.5 rounded-lg font-medium whitespace-nowrap text-gray-400">1H Downtrend</button>
+                <button onclick="switchTab('page4')" id="m-btn-page4" class="tab-btn px-3 py-1.5 rounded-lg font-medium whitespace-nowrap text-gray-400">Market Regime</button>
+            </div>
+        </div>
+    </header>
 
-    <!-- Multi-Color Progress Bar -->
-    <div class="progress-container">
-      <div id="barUp" class="bar-up" style="width: 33.3%;"></div>
-      <div id="barSideways" class="bar-sideways" style="width: 33.3%;"></div>
-      <div id="barDown" class="bar-down" style="width: 33.3%;"></div>
-    </div>
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
 
-    <!-- Detailed Stats -->
-    <div class="stats-grid">
-      <div class="stat-box">
-        <h3 class="text-up">🟢 Uptrend</h3>
-        <div id="valUp" class="number text-up">0%</div>
-        <small id="countUp" style="color:#94a3b8">(0 coins)</small>
-      </div>
-      <div class="stat-box">
-        <h3 class="text-sideways">🟡 Sideways</h3>
-        <div id="valSideways" class="number text-sideways">0%</div>
-        <small id="countSideways" style="color:#94a3b8">(0 coins)</small>
-      </div>
-      <div class="stat-box">
-        <h3 class="text-down">🔴 Downtrend</h3>
-        <div id="valDown" class="number text-down">0%</div>
-        <small id="countDown" style="color:#94a3b8">(0 coins)</small>
-      </div>
-    </div>
+        <!-- Controls Banner -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8 shadow-xl">
+            <div class="flex flex-col md:flex-row items-md-center justify-between gap-4">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-bold text-white flex items-center gap-2">
+                        1D & 1H Dual Timeframe Uptrend
+                    </h2>
+                    <p id="page-desc" class="text-sm text-gray-400 mt-1">
+                        Coins showing strong bullish signals on both 1-Day and 1-Hour candles.
+                    </p>
+                </div>
 
-    <div class="footer">Powered by Binance Public API</div>
-  </div>
+                <!-- Scan Trigger & Actions -->
+                <div class="flex items-center gap-3">
+                    <button id="scan-btn" onclick="startScan()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-gray-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                        <span>Start Scan</span>
+                    </button>
+                </div>
+            </div>
 
-  <script>
-    async function scanMarket() {
-      const badge = document.getElementById('statusBadge');
-      badge.innerHTML = "⏳ Scanning Binance Market...";
-      badge.style.color = "#94a3b8";
+            <!-- Progress Bar -->
+            <div id="progress-container" class="mt-6 hidden">
+                <div class="flex justify-between text-xs text-gray-400 mb-2">
+                    <span id="progress-status">Fetching USDT Spot Pairs...</span>
+                    <span id="progress-percentage" class="font-mono text-emerald-400">0%</span>
+                </div>
+                <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full w-0 transition-all duration-200"></div>
+                </div>
+            </div>
+        </div>
 
-      try {
-        const res = await fetch('https://data-api.binance.vision/api/v3/ticker/24hr');
-        const tickers = await res.json();
+        <!-- Search & Filter Controls (For Pages 1, 2, 3) -->
+        <div id="table-controls" class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            <div class="relative w-full sm:w-72">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="search-input" onkeyup="filterResults()" placeholder="Search Coin (e.g. BTC, ETH)..." class="w-full pl-9 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors">
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end text-sm text-gray-400">
+                <span>Sorted By:</span>
+                <select id="sort-select" onchange="sortResults()" class="bg-gray-900 border border-gray-800 text-white text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500">
+                    <option value="volume">24h Volume (High to Low)</option>
+                    <option value="change">24h Price Change</option>
+                    <option value="rsi">RSI Value</option>
+                </select>
+            </div>
+        </div>
 
-        // USDT Spot pairs skip UP/DOWN leverage
-        const usdtTickers = tickers.filter(t => 
-          t.symbol.endsWith('USDT') && 
-          !t.symbol.includes('UP') && 
-          !t.symbol.includes('DOWN')
-        );
+        <!-- Content Views -->
 
-        let uptrend = 0;
-        let downtrend = 0;
-        let sideways = 0;
-        let total = usdtTickers.length;
+        <!-- Table View (Pages 1, 2, 3) -->
+        <div id="view-table" class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-300">
+                    <thead class="bg-gray-950/80 text-gray-400 uppercase text-xs border-b border-gray-800">
+                        <tr>
+                            <th class="py-4 px-6">Asset</th>
+                            <th class="py-4 px-6">Price (USDT)</th>
+                            <th class="py-4 px-6">24h Change</th>
+                            <th class="py-4 px-6">24h Volume</th>
+                            <th class="py-4 px-6">1H RSI (14)</th>
+                            <th class="py-4 px-6">Trend Status</th>
+                            <th class="py-4 px-6 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crypto-table-body" class="divide-y divide-gray-800/60">
+                        <!-- Initial Placeholder -->
+                        <tr>
+                            <td colspan="7" class="py-16 text-center text-gray-500">
+                                <i data-lucide="scan" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+                                <p class="text-base font-medium">No active scan results yet.</p>
+                                <p class="text-xs text-gray-600 mt-1">Click the "Start Scan" button above to fetch live Binance Spot data.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        usdtTickers.forEach(t => {
-          const change = parseFloat(t.priceChangePercent);
-          if (change > 1.5) uptrend++;
-          else if (change < -1.5) downtrend++;
-          else sideways++;
+        <!-- Regime View (Page 4) -->
+        <div id="view-regime" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Overall Market Sentiment Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Overall Market Bias</h3>
+                        <div id="market-bias-badge" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-gray-800 text-gray-400">
+                            <i data-lucide="help-circle" class="w-5 h-5"></i> Scan Required
+                        </div>
+                        <p id="market-bias-desc" class="text-xs text-gray-400 mt-3 leading-relaxed">
+                            Run a scan to evaluate market distribution across Bullish, Bearish, and Ranging regimes.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-800 grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/50">
+                            <span class="text-xs text-emerald-400 font-medium">Uptrend</span>
+                            <div id="count-uptrend" class="text-xl font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/50">
+                            <span class="text-xs text-amber-400 font-medium">Ranging</span>
+                            <div id="count-ranging" class="text-xl font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/50">
+                            <span class="text-xs text-rose-400 font-medium">Downtrend</span>
+                            <div id="count-downtrend" class="text-xl font-bold text-white mt-1">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Visualization -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col items-center justify-center">
+                    <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider w-full mb-2">Market Distribution</h3>
+                    <div class="w-48 h-48 relative flex items-center justify-center my-auto">
+                        <canvas id="regimeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Market Summary Details -->
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-4">Trading Guidance</h3>
+                        <div class="space-y-3 text-xs leading-relaxed text-gray-300">
+                            <div class="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl">
+                                <strong class="text-emerald-400 block mb-1">Bullish Bias Strategy:</strong>
+                                Focus on long setups on Page 1 coins during minor 15m/1h pullbacks towards EMA support.
+                            </div>
+                            <div class="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl">
+                                <strong class="text-amber-400 block mb-1">Ranging Market Strategy:</strong>
+                                Use Page 2 for grid trading or support/resistance range-bound plays. Avoid breakout FOMO.
+                            </div>
+                            <div class="p-3 bg-rose-950/30 border border-rose-800/40 rounded-xl">
+                                <strong class="text-rose-400 block mb-1">Bearish Market Strategy:</strong>
+                                Hold spot cash/USDT reserves or target coins recovering out of oversold RSI levels.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 bg-gray-950 py-6 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>© Freedom with Arman - Spot Crypto Intelligence Scanner</p>
+            <p class="mt-1 text-gray-600">Data provided directly by Binance Public REST API. For educational and informational purposes only.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State variables
+        let currentTab = 'page1';
+        let isScanning = false;
+        let scannedData = [];
+        let filteredData = [];
+        let regimeChartInstance = null;
+
+        // On Page Load Initialization
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            initChart();
         });
 
-        const upPct = ((uptrend / total) * 100).toFixed(1);
-        const sidePct = ((sideways / total) * 100).toFixed(1);
-        const downPct = ((downtrend / total) * 100).toFixed(1);
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            currentTab = tabId;
 
-        // Update UI Text & Numbers
-        document.getElementById('totalCoins').innerText = `Total USDT Spot Pairs: ${total}`;
-        document.getElementById('valUp').innerText = `${upPct}%`;
-        document.getElementById('countUp').innerText = `(${uptrend} coins)`;
+            // Highlight buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-white'));
+            
+            // Set desktop & mobile button active states
+            const activeDesktop = document.getElementById(`btn-${tabId}`);
+            const activeMobile = document.getElementById(`m-btn-${tabId}`);
+            if (activeDesktop) activeDesktop.classList.add('active');
+            if (activeMobile) activeMobile.classList.add('active');
 
-        document.getElementById('valSideways').innerText = `${sidePct}%`;
-        document.getElementById('countSideways').innerText = `(${sideways} coins)`;
+            // Titles & Descriptions
+            const titleEl = document.getElementById('page-title');
+            const descEl = document.getElementById('page-desc');
+            const controlsEl = document.getElementById('table-controls');
+            const tableView = document.getElementById('view-table');
+            const regimeView = document.getElementById('view-regime');
 
-        document.getElementById('valDown').innerText = `${downPct}%`;
-        document.getElementById('countDown').innerText = `(${downtrend} coins)`;
+            if (tabId === 'page1') {
+                titleEl.textContent = "1D & 1H Dual Timeframe Uptrend";
+                descEl.textContent = "Coins showing strong bullish momentum on both Daily (1D) and Hourly (1H) timeframes.";
+                controlsEl.style.display = "flex";
+                tableView.style.display = "block";
+                regimeView.style.display = "none";
+            } else if (tabId === 'page2') {
+                titleEl.textContent = "1H Ranging Market Coins";
+                descEl.textContent = "Coins consolidating sideways with balanced RSI (~50) and low volatility on 1-Hour chart.";
+                controlsEl.style.display = "flex";
+                tableView.style.display = "block";
+                regimeView.style.display = "none";
+            } else if (tabId === 'page3') {
+                titleEl.textContent = "1H Downtrend Coins";
+                descEl.textContent = "Spot coins experiencing bearish price action and lower lows on the 1-Hour timeframe.";
+                controlsEl.style.display = "flex";
+                tableView.style.display = "block";
+                regimeView.style.display = "none";
+            } else if (tabId === 'page4') {
+                titleEl.textContent = "Global Market Regime Analysis";
+                descEl.textContent = "Comprehensive breakdown of overall spot crypto market state (Bullish / Sideways / Bearish).";
+                controlsEl.style.display = "none";
+                tableView.style.display = "none";
+                regimeView.style.display = "block";
+            }
 
-        // Update Visual Progress Bar
-        document.getElementById('barUp').style.width = `${upPct}%`;
-        document.getElementById('barSideways').style.width = `${sidePct}%`;
-        document.getElementById('barDown').style.width = `${downPct}%`;
-
-        // Update Overall Market Status
-        if (upPct >= 60) {
-          badge.innerHTML = "🚀 STRONG BULLISH MARKET";
-          badge.style.color = "#22c55e";
-        } else if (downPct >= 60) {
-          badge.innerHTML = "🩸 STRONG BEARISH MARKET";
-          badge.style.color = "#ef4444";
-        } else {
-          badge.innerHTML = "⚖️ SIDEWAYS / RANGING MARKET";
-          badge.style.color = "#eab308";
+            // Render table content for active tab
+            renderCurrentView();
         }
 
-      } catch (err) {
-        badge.innerHTML = "❌ Failed to fetch market data";
-        badge.style.color = "#ef4444";
-      }
-    }
+        // Calculation Helpers for Technical Analysis
+        function calculateRSI(prices, period = 14) {
+            if (prices.length < period + 1) return 50;
+            let gains = 0, losses = 0;
+            for (let i = 1; i <= period; i++) {
+                let diff = prices[i] - prices[i - 1];
+                if (diff >= 0) gains += diff;
+                else losses -= diff;
+            }
+            let avgGain = gains / period;
+            let avgLoss = losses / period;
+            
+            for (let i = period + 1; i < prices.length; i++) {
+                let diff = prices[i] - prices[i - 1];
+                if (diff >= 0) {
+                    avgGain = (avgGain * (period - 1) + diff) / period;
+                    avgLoss = (avgLoss * (period - 1)) / period;
+                } else {
+                    avgGain = (avgGain * (period - 1)) / period;
+                    avgLoss = (avgLoss * (period - 1) - diff) / period;
+                }
+            }
+            if (avgLoss === 0) return 100;
+            let rs = avgGain / avgLoss;
+            return 100 - (100 / (1 + rs));
+        }
 
-    // Auto scan on load
-    scanMarket();
-  </script>
+        function calculateSMA(prices, period) {
+            if (prices.length < period) return prices[prices.length - 1];
+            let sum = 0;
+            for (let i = prices.length - period; i < prices.length; i++) {
+                sum += prices[i];
+            }
+            return sum / period;
+        }
+
+        // Main Scanning Function
+        async function startScan() {
+            if (isScanning) return;
+            isScanning = true;
+
+            const scanBtn = document.getElementById('scan-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressStatus = document.getElementById('progress-status');
+            const progressPercentage = document.getElementById('progress-percentage');
+
+            // UI Progress Reset
+            scanBtn.disabled = true;
+            scanBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            scanBtn.querySelector('span').textContent = "Scanning...";
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressPercentage.textContent = '0%';
+            progressStatus.textContent = "Fetching Binance Spot pairs...";
+
+            try {
+                // Step 1: Fetch 24h Ticker data from Binance Spot
+                const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+                const tickerData = await tickerRes.json();
+
+                // Filter top liquid USDT spot trading pairs (Excluding Futures, DOWN, UP, BEAR, BULL tokens)
+                let usdtPairs = tickerData.filter(item => 
+                    item.symbol.endsWith('USDT') && 
+                    !item.symbol.includes('UP') && 
+                    !item.symbol.includes('DOWN') &&
+                    !item.symbol.includes('BULL') &&
+                    !item.symbol.includes('BEAR') &&
+                    parseFloat(item.quoteVolume) > 3000000 // Top volume pairs (> 3M USDT volume)
+                );
+
+                // Sort by highest volume and cap to top 50 pairs for fast live scanning
+                usdtPairs.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
+                usdtPairs = usdtPairs.slice(0, 50);
+
+                scannedData = [];
+                const total = usdtPairs.length;
+
+                // Step 2: Fetch Candles and process Technical Signals for each pair
+                for (let i = 0; i < total; i++) {
+                    const item = usdtPairs[i];
+                    const symbol = item.symbol;
+                    
+                    progressStatus.textContent = `Analyzing (${i + 1}/${total}): ${symbol}`;
+                    const percent = Math.round(((i + 1) / total) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    progressPercentage.textContent = `${percent}%`;
+
+                    try {
+                        // Fetch 1H candles
+                        const klines1hRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=50`);
+                        const klines1h = await klines1hRes.json();
+
+                        // Fetch 1D candles
+                        const klines1dRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=30`);
+                        const klines1d = await klines1dRes.json();
+
+                        const closes1h = klines1h.map(k => parseFloat(k[4]));
+                        const closes1d = klines1d.map(k => parseFloat(k[4]));
+
+                        const currentPrice = closes1h[closes1h.length - 1];
+                        const rsi1h = calculateRSI(closes1h, 14);
+                        const sma20_1h = calculateSMA(closes1h, 20);
+                        const sma50_1h = calculateSMA(closes1h, 50);
+
+                        const sma20_1d = calculateSMA(closes1d, 20);
+
+                        // Signal Classifications
+                        const is1DUptrend = currentPrice > sma20_1d;
+                        const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h && rsi1h > 52;
+                        const is1HDowntrend = currentPrice < sma20_1h && rsi1h < 45;
+                        const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.012 && rsi1h >= 45 && rsi1h <= 55;
+
+                        scannedData.push({
+                            symbol: symbol.replace('USDT', ''),
+                            fullSymbol: symbol,
+                            price: currentPrice,
+                            change: parseFloat(item.priceChangePercent),
+                            volume: parseFloat(item.quoteVolume),
+                            rsi1h: rsi1h,
+                            isDualUptrend: is1DUptrend && is1HUptrend,
+                            isRanging: is1HRanging,
+                            isDowntrend: is1HDowntrend
+                        });
+                    } catch (err) {
+                        console.error(`Error processing ${symbol}`, err);
+                    }
+                }
+
+                progressStatus.textContent = "Scan Completed Successfully!";
+            } catch (error) {
+                console.error("Scan failed:", error);
+                alert("Failed to scan market data. Please check your internet connection.");
+            } finally {
+                isScanning = false;
+                scanBtn.disabled = false;
+                scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                scanBtn.querySelector('span').textContent = "Re-Scan Market";
+
+                renderCurrentView();
+                updateRegimePage();
+            }
+        }
+
+        // Render Table Rows based on current Tab & Filters
+        function renderCurrentView() {
+            if (currentTab === 'page4') return;
+
+            const tbody = document.getElementById('crypto-table-body');
+            let dataToDisplay = [];
+
+            if (currentTab === 'page1') {
+                dataToDisplay = scannedData.filter(d => d.isDualUptrend);
+            } else if (currentTab === 'page2') {
+                dataToDisplay = scannedData.filter(d => d.isRanging);
+            } else if (currentTab === 'page3') {
+                dataToDisplay = scannedData.filter(d => d.isDowntrend);
+            }
+
+            // Apply Search Term
+            const searchTerm = document.getElementById('search-input').value.toUpperCase();
+            if (searchTerm) {
+                dataToDisplay = dataToDisplay.filter(d => d.symbol.includes(searchTerm));
+            }
+
+            // Apply Sort
+            const sortVal = document.getElementById('sort-select').value;
+            if (sortVal === 'volume') {
+                dataToDisplay.sort((a, b) => b.volume - a.volume);
+            } else if (sortVal === 'change') {
+                dataToDisplay.sort((a, b) => b.change - a.change);
+            } else if (sortVal === 'rsi') {
+                dataToDisplay.sort((a, b) => b.rsi1h - a.rsi1h);
+            }
+
+            filteredData = dataToDisplay;
+
+            if (dataToDisplay.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-gray-500">
+                            <i data-lucide="info" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                            <p class="text-sm font-medium">No coins matching criteria in this category.</p>
+                            <p class="text-xs text-gray-600 mt-1">Try running a new scan or clearing search filters.</p>
+                        </td>
+                    </tr>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            tbody.innerHTML = dataToDisplay.map(coin => {
+                const isPos = coin.change >= 0;
+                const changeColor = isPos ? 'text-emerald-400 bg-emerald-950/50 border-emerald-800/40' : 'text-rose-400 bg-rose-950/50 border-rose-800/40';
+                const formattedPrice = coin.price < 1 ? coin.price.toFixed(5) : coin.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const formattedVol = (coin.volume / 1000000).toFixed(2) + 'M';
+
+                let badge = '';
+                if (currentTab === 'page1') {
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">1D + 1H Bullish</span>`;
+                } else if (currentTab === 'page2') {
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">1H Sideways</span>`;
+                } else if (currentTab === 'page3') {
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">1H Bearish</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-gray-800/40 transition-colors">
+                        <td class="py-4 px-6 font-bold text-white flex items-center gap-2">
+                            <span class="text-base">${coin.symbol}</span>
+                            <span class="text-xs text-gray-500 font-normal">/USDT</span>
+                        </td>
+                        <td class="py-4 px-6 font-mono font-semibold text-white">$${formattedPrice}</td>
+                        <td class="py-4 px-6">
+                            <span class="px-2 py-1 rounded-lg text-xs font-semibold border ${changeColor}">
+                                ${isPos ? '+' : ''}${coin.change.toFixed(2)}%
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-gray-400 font-mono text-xs">$${formattedVol}</td>
+                        <td class="py-4 px-6 font-mono font-medium">${coin.rsi1h.toFixed(1)}</td>
+                        <td class="py-4 px-6">${badge}</td>
+                        <td class="py-4 px-6 text-right">
+                            <a href="https://www.binance.com/en/trade/${coin.symbol}_USDT?type=spot" target="_blank" class="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 hover:underline">
+                                Trade <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Live Search Filter Handler
+        function filterResults() {
+            renderCurrentView();
+        }
+
+        // Sorting Handler
+        function sortResults() {
+            renderCurrentView();
+        }
+
+        // Update Page 4 (Market Regime Summary)
+        function updateRegimePage() {
+            const uptrendCount = scannedData.filter(d => d.isDualUptrend).length;
+            const rangingCount = scannedData.filter(d => d.isRanging).length;
+            const downtrendCount = scannedData.filter(d => d.isDowntrend).length;
+
+            document.getElementById('count-uptrend').textContent = uptrendCount;
+            document.getElementById('count-ranging').textContent = rangingCount;
+            document.getElementById('count-downtrend').textContent = downtrendCount;
+
+            const badgeEl = document.getElementById('market-bias-badge');
+            const descEl = document.getElementById('market-bias-desc');
+
+            if (scannedData.length > 0) {
+                if (uptrendCount >= rangingCount && uptrendCount >= downtrendCount) {
+                    badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    badgeEl.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5"></i> Bullish Regime`;
+                    descEl.textContent = "The majority of spot coins are exhibiting strong upward momentum across multiple timeframes. Favorable for momentum buying.";
+                } else if (rangingCount >= uptrendCount && rangingCount >= downtrendCount) {
+                    badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                    badgeEl.innerHTML = `<i data-lucide="arrow-right-left" class="w-5 h-5"></i> Sideways / Ranging`;
+                    descEl.textContent = "Market is consolidating with low directional drive. Range trading tactics recommended.";
+                } else {
+                    badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+                    badgeEl.innerHTML = `<i data-lucide="trending-down" class="w-5 h-5"></i> Bearish Regime`;
+                    descEl.textContent = "Downward pressure dominates the market. Cash preservation or waiting for clean reversal signals is advised.";
+                }
+            }
+
+            // Update Doughnut Chart
+            if (regimeChartInstance) {
+                regimeChartInstance.data.datasets[0].data = [uptrendCount, rangingCount, downtrendCount];
+                regimeChartInstance.update();
+            }
+
+            lucide.createIcons();
+        }
+
+        // Initialize Chart.js Doughnut Chart
+        function initChart() {
+            const ctx = document.getElementById('regimeChart').getContext('2d');
+            regimeChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Uptrend', 'Ranging', 'Downtrend'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '75%'
+                }
+            });
+        }
+    </script>
 </body>
 </html>
