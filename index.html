@@ -22,7 +22,6 @@
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -64,7 +63,7 @@
                 <!-- Navigation Tabs -->
                 <nav class="hidden md:flex space-x-2 bg-gray-950/60 p-1.5 rounded-xl border border-gray-800">
                     <button onclick="switchTab('page1')" id="btn-page1" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
-                        <i data-lucide="trending-up" class="w-4 h-4"></i> 1D & 1H Uptrend (RSI ≥ 53)
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> 1D & 1H Uptrend (RSI Cross 55)
                     </button>
                     <button onclick="switchTab('page2')" id="btn-page2" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
                         <i data-lucide="arrow-right-left" class="w-4 h-4"></i> 1H Ranging
@@ -96,10 +95,10 @@
             <div class="flex flex-col md:flex-row items-md-center justify-between gap-4">
                 <div>
                     <h2 id="page-title" class="text-2xl font-bold text-white flex items-center gap-2">
-                        1D & 1H Dual Timeframe Uptrend (RSI ≥ 53)
+                        1D & 1H Uptrend (RSI Cross Above 55)
                     </h2>
                     <p id="page-desc" class="text-sm text-gray-400 mt-1">
-                        Coins in uptrend on both Daily (1D) & Hourly (1H) timeframes with 1H RSI >= 53.
+                        Coins in 1D & 1H Uptrend where 1H RSI is crossing from below 55 to above 55.
                     </p>
                 </div>
 
@@ -124,7 +123,7 @@
             </div>
         </div>
 
-        <!-- Search & Filter Controls (For Pages 1, 2, 3) -->
+        <!-- Search & Filter Controls -->
         <div id="table-controls" class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div class="relative w-full sm:w-72">
                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -140,9 +139,7 @@
             </div>
         </div>
 
-        <!-- Content Views -->
-
-        <!-- Table View (Pages 1, 2, 3) -->
+        <!-- Table View -->
         <div id="view-table" class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-300">
@@ -158,7 +155,6 @@
                         </tr>
                     </thead>
                     <tbody id="crypto-table-body" class="divide-y divide-gray-800/60">
-                        <!-- Initial Placeholder -->
                         <tr>
                             <td colspan="7" class="py-16 text-center text-gray-500">
                                 <i data-lucide="scan" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
@@ -171,11 +167,10 @@
             </div>
         </div>
 
-        <!-- Regime View (Page 4) -->
+        <!-- Regime View -->
         <div id="view-regime" class="hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <!-- Overall Market Sentiment Card -->
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                         <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Overall Market Bias</h3>
@@ -203,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Chart Visualization -->
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col items-center justify-center">
                     <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider w-full mb-2">Market Distribution</h3>
                     <div class="w-48 h-48 relative flex items-center justify-center my-auto">
@@ -211,14 +205,13 @@
                     </div>
                 </div>
 
-                <!-- Market Summary Details -->
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                         <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-4">Trading Guidance</h3>
                         <div class="space-y-3 text-xs leading-relaxed text-gray-300">
                             <div class="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl">
-                                <strong class="text-emerald-400 block mb-1">Bullish Bias Strategy:</strong>
-                                Focus on long setups on Page 1 coins (1D & 1H Uptrend with RSI ≥ 53).
+                                <strong class="text-emerald-400 block mb-1">Bullish Crossover Strategy:</strong>
+                                Focus on long setups on Page 1 coins where RSI is crossing from below 55 to above 55.
                             </div>
                             <div class="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl">
                                 <strong class="text-amber-400 block mb-1">Ranging Market Strategy:</strong>
@@ -226,7 +219,7 @@
                             </div>
                             <div class="p-3 bg-rose-950/30 border border-rose-800/40 rounded-xl">
                                 <strong class="text-rose-400 block mb-1">Bearish Reversal Strategy:</strong>
-                                Use Page 3 to spot coins in downtrend with 1H RSI between 20 and 30 (Oversold bounce area).
+                                Use Page 3 to spot coins in downtrend with 1H RSI between 20 and 30.
                             </div>
                         </div>
                     </div>
@@ -245,7 +238,6 @@
         </div>
     </footer>
 
-    <!-- JavaScript Application Logic -->
     <script>
         let currentTab = 'page1';
         let isScanning = false;
@@ -275,8 +267,8 @@
             const regimeView = document.getElementById('view-regime');
 
             if (tabId === 'page1') {
-                titleEl.textContent = "1D & 1H Dual Timeframe Uptrend (RSI ≥ 53)";
-                descEl.textContent = "Spot coins in uptrend on both Daily (1D) and Hourly (1H) timeframes with 1H RSI >= 53.";
+                titleEl.textContent = "1D & 1H Uptrend (RSI Cross Above 55)";
+                descEl.textContent = "Coins in 1D & 1H Uptrend where 1H RSI is crossing from below 55 to above 55.";
                 controlsEl.style.display = "flex";
                 tableView.style.display = "block";
                 regimeView.style.display = "none";
@@ -303,17 +295,24 @@
             renderCurrentView();
         }
 
-        function calculateRSI(prices, period = 14) {
-            if (prices.length < period + 1) return 50;
+        // RSI Array Calculation
+        function calculateRSIArray(prices, period = 14) {
+            if (prices.length < period + 1) return [];
+            let rsiValues = [];
             let gains = 0, losses = 0;
+
             for (let i = 1; i <= period; i++) {
                 let diff = prices[i] - prices[i - 1];
                 if (diff >= 0) gains += diff;
                 else losses -= diff;
             }
+
             let avgGain = gains / period;
             let avgLoss = losses / period;
-            
+
+            let firstRsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+            rsiValues.push(firstRsi);
+
             for (let i = period + 1; i < prices.length; i++) {
                 let diff = prices[i] - prices[i - 1];
                 if (diff >= 0) {
@@ -323,10 +322,12 @@
                     avgGain = (avgGain * (period - 1)) / period;
                     avgLoss = (avgLoss * (period - 1) - diff) / period;
                 }
+                let rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                let rsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + rs));
+                rsiValues.push(rsi);
             }
-            if (avgLoss === 0) return 100;
-            let rs = avgGain / avgLoss;
-            return 100 - (100 / (1 + rs));
+
+            return rsiValues;
         }
 
         function calculateSMA(prices, period) {
@@ -346,7 +347,7 @@
                     const symbol = item.symbol;
                     try {
                         const [res1h, res1d] = await Promise.all([
-                            fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=50`),
+                            fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=60`),
                             fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=30`)
                         ]);
 
@@ -359,25 +360,30 @@
                         const closes1d = klines1d.map(k => parseFloat(k[4]));
 
                         const currentPrice = closes1h[closes1h.length - 1];
-                        const rsi1h = calculateRSI(closes1h, 14);
                         
+                        // Calculate RSI Array for 1H chart
+                        const rsiArray1h = calculateRSIArray(closes1h, 14);
+                        const currentRsi1h = rsiArray1h[rsiArray1h.length - 1];
+                        const prevRsi1h = rsiArray1h[rsiArray1h.length - 2];
+
                         const sma20_1h = calculateSMA(closes1h, 20);
                         const sma50_1h = calculateSMA(closes1h, 50);
                         const sma20_1d = calculateSMA(closes1d, 20);
 
-                        // 1. Daily & Hourly Uptrend Logic
+                        // Uptrend Criteria
                         const is1DUptrend = currentPrice > sma20_1d;
                         const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h;
                         
-                        // Condition Page 1: 1D Uptrend AND 1H Uptrend AND RSI >= 53
-                        const isDualUptrendWithRsi = is1DUptrend && is1HUptrend && (rsi1h >= 53);
+                        // RSI Crossover Logic: Prev Candle < 55 AND Current Candle >= 55
+                        const isRsiCrossAbove55 = prevRsi1h < 55 && currentRsi1h >= 55;
+                        const isDualUptrendCross = is1DUptrend && is1HUptrend && isRsiCrossAbove55;
 
-                        // Condition Page 3: 1H Downtrend AND RSI strictly between 20 and 30
+                        // Page 3: Downtrend Criteria (RSI 20 to 30)
                         const is1HDowntrend = currentPrice < sma20_1h;
-                        const isDowntrendRsiTarget = is1HDowntrend && (rsi1h >= 20 && rsi1h <= 30);
+                        const isDowntrendRsiTarget = is1HDowntrend && (currentRsi1h >= 20 && currentRsi1h <= 30);
 
-                        // Condition Page 2: 1H Ranging
-                        const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.015 && rsi1h >= 45 && rsi1h <= 55;
+                        // Page 2: Ranging Criteria
+                        const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.015 && currentRsi1h >= 45 && currentRsi1h <= 55;
 
                         return {
                             symbol: symbol.replace('USDT', ''),
@@ -385,8 +391,9 @@
                             price: currentPrice,
                             change: parseFloat(item.priceChangePercent),
                             volume: parseFloat(item.quoteVolume),
-                            rsi1h: rsi1h,
-                            isDualUptrend: isDualUptrendWithRsi,
+                            rsi1h: currentRsi1h,
+                            prevRsi1h: prevRsi1h,
+                            isDualUptrend: isDualUptrendCross,
                             isRanging: is1HRanging,
                             isDowntrend: isDowntrendRsiTarget
                         };
@@ -442,7 +449,7 @@
 
                 allUsdtSpotPairs.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
 
-                progressStatus.textContent = `Found ${allUsdtSpotPairs.length} Spot Coins. Analyzing indicators...`;
+                progressStatus.textContent = `Found ${allUsdtSpotPairs.length} Spot Coins. Analyzing RSI Crossovers...`;
 
                 scannedData = await fetchWithBatch(allUsdtSpotPairs, 8, 80);
 
@@ -496,7 +503,7 @@
                     <tr>
                         <td colspan="7" class="py-12 text-center text-gray-500">
                             <i data-lucide="info" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-                            <p class="text-sm font-medium">No coins matching these specific criteria right now.</p>
+                            <p class="text-sm font-medium">No coins matching RSI 55 Crossover criteria right now.</p>
                             <p class="text-xs text-gray-600 mt-1">Try running a new scan or check other tabs.</p>
                         </td>
                     </tr>
@@ -513,7 +520,7 @@
 
                 let badge = '';
                 if (currentTab === 'page1') {
-                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">1D+1H Uptrend (RSI ≥ 53)</span>`;
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">RSI Cross 55 (${coin.prevRsi1h.toFixed(1)} → ${coin.rsi1h.toFixed(1)})</span>`;
                 } else if (currentTab === 'page2') {
                     badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">1H Sideways</span>`;
                 } else if (currentTab === 'page3') {
@@ -570,8 +577,8 @@
             if (scannedData.length > 0) {
                 if (uptrendCount >= rangingCount && uptrendCount >= downtrendCount) {
                     badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                    badgeEl.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5"></i> Bullish Bias`;
-                    descEl.textContent = "Many spot coins are showing dual uptrend confirmation with RSI >= 53.";
+                    badgeEl.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5"></i> Bullish Crossover Bias`;
+                    descEl.textContent = "Multiple coins are triggering fresh RSI 55 bullish crossover signals.";
                 } else if (rangingCount >= uptrendCount && rangingCount >= downtrendCount) {
                     badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30";
                     badgeEl.innerHTML = `<i data-lucide="arrow-right-left" class="w-5 h-5"></i> Sideways Bias`;
