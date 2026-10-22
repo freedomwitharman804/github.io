@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freedom with Arman - All Spot Crypto Scanner</title>
+    <title>Freedom with Arman - Spot Crypto Scanner</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN for Page 4 -->
@@ -56,7 +56,7 @@
                         </h1>
                         <p class="text-xs text-gray-400 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                            Binance All Spot Coins Scanner
+                            Binance Spot Market Scanner
                         </p>
                     </div>
                 </div>
@@ -64,13 +64,13 @@
                 <!-- Navigation Tabs -->
                 <nav class="hidden md:flex space-x-2 bg-gray-950/60 p-1.5 rounded-xl border border-gray-800">
                     <button onclick="switchTab('page1')" id="btn-page1" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
-                        <i data-lucide="trending-up" class="w-4 h-4"></i> 1D & 1H Uptrend
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> 1D & 1H Uptrend (RSI ≥ 53)
                     </button>
                     <button onclick="switchTab('page2')" id="btn-page2" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
                         <i data-lucide="arrow-right-left" class="w-4 h-4"></i> 1H Ranging
                     </button>
                     <button onclick="switchTab('page3')" id="btn-page3" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
-                        <i data-lucide="trending-down" class="w-4 h-4"></i> 1H Downtrend
+                        <i data-lucide="trending-down" class="w-4 h-4"></i> 1H Downtrend (RSI 20-30)
                     </button>
                     <button onclick="switchTab('page4')" id="btn-page4" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-white flex items-center gap-2">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i> Market Regime
@@ -96,10 +96,10 @@
             <div class="flex flex-col md:flex-row items-md-center justify-between gap-4">
                 <div>
                     <h2 id="page-title" class="text-2xl font-bold text-white flex items-center gap-2">
-                        1D & 1H Dual Timeframe Uptrend
+                        1D & 1H Dual Timeframe Uptrend (RSI ≥ 53)
                     </h2>
                     <p id="page-desc" class="text-sm text-gray-400 mt-1">
-                        Coins showing strong bullish signals on both 1-Day and 1-Hour candles.
+                        Coins in uptrend on both Daily (1D) & Hourly (1H) timeframes with 1H RSI >= 53.
                     </p>
                 </div>
 
@@ -107,7 +107,7 @@
                 <div class="flex items-center gap-3">
                     <button id="scan-btn" onclick="startScan()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-gray-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
                         <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                        <span>Start Full Scan</span>
+                        <span>Start Scan</span>
                     </button>
                 </div>
             </div>
@@ -115,7 +115,7 @@
             <!-- Progress Bar -->
             <div id="progress-container" class="mt-6 hidden">
                 <div class="flex justify-between text-xs text-gray-400 mb-2">
-                    <span id="progress-status">Fetching all USDT Spot Pairs...</span>
+                    <span id="progress-status">Fetching all Binance Spot Pairs...</span>
                     <span id="progress-percentage" class="font-mono text-emerald-400">0%</span>
                 </div>
                 <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
@@ -163,7 +163,7 @@
                             <td colspan="7" class="py-16 text-center text-gray-500">
                                 <i data-lucide="scan" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
                                 <p class="text-base font-medium">No active scan results yet.</p>
-                                <p class="text-xs text-gray-600 mt-1">Click "Start Full Scan" to scan all Binance Spot coins.</p>
+                                <p class="text-xs text-gray-600 mt-1">Click "Start Scan" to fetch live Binance Spot data.</p>
                             </td>
                         </tr>
                     </tbody>
@@ -218,15 +218,15 @@
                         <div class="space-y-3 text-xs leading-relaxed text-gray-300">
                             <div class="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl">
                                 <strong class="text-emerald-400 block mb-1">Bullish Bias Strategy:</strong>
-                                Focus on long setups on Page 1 coins during minor 15m/1h pullbacks towards EMA support.
+                                Focus on long setups on Page 1 coins (1D & 1H Uptrend with RSI ≥ 53).
                             </div>
                             <div class="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl">
                                 <strong class="text-amber-400 block mb-1">Ranging Market Strategy:</strong>
-                                Use Page 2 for grid trading or support/resistance range-bound plays. Avoid breakout FOMO.
+                                Use Page 2 for range-bound plays. Avoid breakout FOMO.
                             </div>
                             <div class="p-3 bg-rose-950/30 border border-rose-800/40 rounded-xl">
-                                <strong class="text-rose-400 block mb-1">Bearish Market Strategy:</strong>
-                                Hold spot cash/USDT reserves or target coins recovering out of oversold RSI levels.
+                                <strong class="text-rose-400 block mb-1">Bearish Reversal Strategy:</strong>
+                                Use Page 3 to spot coins in downtrend with 1H RSI between 20 and 30 (Oversold bounce area).
                             </div>
                         </div>
                     </div>
@@ -275,8 +275,8 @@
             const regimeView = document.getElementById('view-regime');
 
             if (tabId === 'page1') {
-                titleEl.textContent = "1D & 1H Dual Timeframe Uptrend";
-                descEl.textContent = "Coins showing strong bullish momentum on both Daily (1D) and Hourly (1H) timeframes.";
+                titleEl.textContent = "1D & 1H Dual Timeframe Uptrend (RSI ≥ 53)";
+                descEl.textContent = "Spot coins in uptrend on both Daily (1D) and Hourly (1H) timeframes with 1H RSI >= 53.";
                 controlsEl.style.display = "flex";
                 tableView.style.display = "block";
                 regimeView.style.display = "none";
@@ -287,8 +287,8 @@
                 tableView.style.display = "block";
                 regimeView.style.display = "none";
             } else if (tabId === 'page3') {
-                titleEl.textContent = "1H Downtrend Coins";
-                descEl.textContent = "Spot coins experiencing bearish price action and lower lows on the 1-Hour timeframe.";
+                titleEl.textContent = "1H Downtrend Coins (RSI 20 - 30)";
+                descEl.textContent = "Spot coins in 1-Hour downtrend with RSI strictly between 20 and 30.";
                 controlsEl.style.display = "flex";
                 tableView.style.display = "block";
                 regimeView.style.display = "none";
@@ -338,8 +338,7 @@
             return sum / period;
         }
 
-        // Batch helper to avoid browser rate-limits during full scan
-        async function fetchWithBatch(pairs, batchSize = 10, delayMs = 100) {
+        async function fetchWithBatch(pairs, batchSize = 10, delayMs = 80) {
             const results = [];
             for (let i = 0; i < pairs.length; i += batchSize) {
                 const batch = pairs.slice(i, i + batchSize);
@@ -361,13 +360,23 @@
 
                         const currentPrice = closes1h[closes1h.length - 1];
                         const rsi1h = calculateRSI(closes1h, 14);
+                        
                         const sma20_1h = calculateSMA(closes1h, 20);
                         const sma50_1h = calculateSMA(closes1h, 50);
                         const sma20_1d = calculateSMA(closes1d, 20);
 
+                        // 1. Daily & Hourly Uptrend Logic
                         const is1DUptrend = currentPrice > sma20_1d;
-                        const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h && rsi1h > 52;
-                        const is1HDowntrend = currentPrice < sma20_1h && rsi1h < 45;
+                        const is1HUptrend = currentPrice > sma20_1h && sma20_1h > sma50_1h;
+                        
+                        // Condition Page 1: 1D Uptrend AND 1H Uptrend AND RSI >= 53
+                        const isDualUptrendWithRsi = is1DUptrend && is1HUptrend && (rsi1h >= 53);
+
+                        // Condition Page 3: 1H Downtrend AND RSI strictly between 20 and 30
+                        const is1HDowntrend = currentPrice < sma20_1h;
+                        const isDowntrendRsiTarget = is1HDowntrend && (rsi1h >= 20 && rsi1h <= 30);
+
+                        // Condition Page 2: 1H Ranging
                         const is1HRanging = Math.abs((currentPrice - sma20_1h) / sma20_1h) < 0.015 && rsi1h >= 45 && rsi1h <= 55;
 
                         return {
@@ -377,9 +386,9 @@
                             change: parseFloat(item.priceChangePercent),
                             volume: parseFloat(item.quoteVolume),
                             rsi1h: rsi1h,
-                            isDualUptrend: is1DUptrend && is1HUptrend,
+                            isDualUptrend: isDualUptrendWithRsi,
                             isRanging: is1HRanging,
-                            isDowntrend: is1HDowntrend
+                            isDowntrend: isDowntrendRsiTarget
                         };
                     } catch (e) {
                         return null;
@@ -389,7 +398,6 @@
                 const batchResults = await Promise.all(batchPromises);
                 results.push(...batchResults.filter(r => r !== null));
 
-                // Progress Update
                 const processedCount = Math.min(i + batchSize, pairs.length);
                 const percent = Math.round((processedCount / pairs.length) * 100);
                 document.getElementById('progress-bar').style.width = `${percent}%`;
@@ -413,7 +421,7 @@
 
             scanBtn.disabled = true;
             scanBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            scanBtn.querySelector('span').textContent = "Scanning All Coins...";
+            scanBtn.querySelector('span').textContent = "Scanning...";
             progressContainer.classList.remove('hidden');
             progressBar.style.width = '0%';
             progressPercentage.textContent = '0%';
@@ -423,25 +431,22 @@
                 const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
                 const tickerData = await tickerRes.json();
 
-                // Get ALL Spot USDT Trading Pairs (Excluding UP/DOWN leverage tokens)
                 let allUsdtSpotPairs = tickerData.filter(item => 
                     item.symbol.endsWith('USDT') && 
                     !item.symbol.includes('UP') && 
                     !item.symbol.includes('DOWN') &&
                     !item.symbol.includes('BULL') &&
                     !item.symbol.includes('BEAR') &&
-                    parseFloat(item.quoteVolume) > 50000 // Active coins with minimum volume
+                    parseFloat(item.quoteVolume) > 50000
                 );
 
-                // Sort by Volume
                 allUsdtSpotPairs.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
 
-                progressStatus.textContent = `Found ${allUsdtSpotPairs.length} Spot Coins. Starting analysis...`;
+                progressStatus.textContent = `Found ${allUsdtSpotPairs.length} Spot Coins. Analyzing indicators...`;
 
-                // Perform batch scan
                 scannedData = await fetchWithBatch(allUsdtSpotPairs, 8, 80);
 
-                progressStatus.textContent = `Scan Complete! Scanned ${scannedData.length} active Binance spot coins.`;
+                progressStatus.textContent = `Scan Complete! Scanned ${scannedData.length} spot coins.`;
             } catch (error) {
                 console.error("Scan failed:", error);
                 alert("Failed to scan market data. Please check your internet connection.");
@@ -491,8 +496,8 @@
                     <tr>
                         <td colspan="7" class="py-12 text-center text-gray-500">
                             <i data-lucide="info" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-                            <p class="text-sm font-medium">No coins matching criteria in this category.</p>
-                            <p class="text-xs text-gray-600 mt-1">Try running a new scan or clearing search filters.</p>
+                            <p class="text-sm font-medium">No coins matching these specific criteria right now.</p>
+                            <p class="text-xs text-gray-600 mt-1">Try running a new scan or check other tabs.</p>
                         </td>
                     </tr>
                 `;
@@ -508,11 +513,11 @@
 
                 let badge = '';
                 if (currentTab === 'page1') {
-                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">1D + 1H Bullish</span>`;
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">1D+1H Uptrend (RSI ≥ 53)</span>`;
                 } else if (currentTab === 'page2') {
                     badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">1H Sideways</span>`;
                 } else if (currentTab === 'page3') {
-                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">1H Bearish</span>`;
+                    badge = `<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">1H Downtrend (RSI 20-30)</span>`;
                 }
 
                 return `
@@ -565,16 +570,16 @@
             if (scannedData.length > 0) {
                 if (uptrendCount >= rangingCount && uptrendCount >= downtrendCount) {
                     badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                    badgeEl.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5"></i> Bullish Regime`;
-                    descEl.textContent = "The majority of spot coins are exhibiting strong upward momentum across multiple timeframes. Favorable for momentum buying.";
+                    badgeEl.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5"></i> Bullish Bias`;
+                    descEl.textContent = "Many spot coins are showing dual uptrend confirmation with RSI >= 53.";
                 } else if (rangingCount >= uptrendCount && rangingCount >= downtrendCount) {
                     badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30";
-                    badgeEl.innerHTML = `<i data-lucide="arrow-right-left" class="w-5 h-5"></i> Sideways / Ranging`;
-                    descEl.textContent = "Market is consolidating with low directional drive. Range trading tactics recommended.";
+                    badgeEl.innerHTML = `<i data-lucide="arrow-right-left" class="w-5 h-5"></i> Sideways Bias`;
+                    descEl.textContent = "Market is consolidating with low directional drive.";
                 } else {
                     badgeEl.className = "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-lg font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/30";
-                    badgeEl.innerHTML = `<i data-lucide="trending-down" class="w-5 h-5"></i> Bearish Regime`;
-                    descEl.textContent = "Downward pressure dominates the market. Cash preservation or waiting for clean reversal signals is advised.";
+                    badgeEl.innerHTML = `<i data-lucide="trending-down" class="w-5 h-5"></i> Bearish / Oversold Zone`;
+                    descEl.textContent = "Multiple coins are in downtrend with RSI in oversold territory (20 - 30).";
                 }
             }
 
